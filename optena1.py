@@ -11,7 +11,7 @@ st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_ic
 
 
 # Display the logo at the top of the page
-st.image("optena.jpg", use_column_width=True)  
+st.image("optena.jpg", use_column_width=200)  
 
 # Adjust 'use_column_width' if you want it to scale to the page width
 
