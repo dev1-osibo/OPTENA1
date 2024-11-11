@@ -5,11 +5,15 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+# Set the page configuration (only call this once)
+st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_icon="favicon.ico", layout="wide")
+
 # Set the page configuration to include the title and favicon
-st.set_page_config(page_title="OPTENA", page_icon="favicon.ico")
+#st.set_page_config(page_title="OPTENA", page_icon="favicon.ico")
 
 # Set the page configuration
-st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", layout="wide")
+#st.set_page_config(page_title="OPTENA: Data Center Energy #Optimization", layout="wide")
 
 # App Header
 st.markdown(
