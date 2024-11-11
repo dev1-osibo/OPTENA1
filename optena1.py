@@ -11,23 +11,23 @@ st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_ic
 
 
 # Center the image using CSS
-st.markdown(
-    """
-    <style>
-    .centered-image {
-        display: flex;
-        justify-content: center;
-        margin-top: 10px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+#st.markdown(
+#    """
+#    <style>
+#    .centered-image {
+#        display: flex;
+#        justify-content: center;
+#        margin-top: 10px;
+#    }
+#    </style>
+#    """,
+#    unsafe_allow_html=True
+#)
 
 # Display the image, wrapped in a div with the custom CSS class
-st.markdown('<div class="centered-image">', unsafe_allow_html=True)
-st.image("optena.jpg", use_column_width=5)
-st.markdown('</div>', unsafe_allow_html=True)
+#st.markdown('<div class="centered-image">', #unsafe_allow_html=True)
+#st.image("optena.jpg", use_column_width=5)
+#st.markdown('</div>', unsafe_allow_html=True)
 
 # Display the logo centered at the top using HTML and CSS
 #st.markdown(
@@ -65,7 +65,7 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 # App Header
 st.markdown(
-    "<h1 style='text-align: center; color: #4CAF50; font-size: 10em;'>OPTENA</h1>",
+    "<h1 style='text-align: center; color: #4CAF50; font-size: 20em;'>OPTENA</h1>",
     unsafe_allow_html=True
 )
 st.markdown(
