@@ -26,7 +26,7 @@ st.markdown(
 
 # Display the image, wrapped in a div with the custom CSS class
 st.markdown('<div class="centered-image">', unsafe_allow_html=True)
-st.image("optena.jpg", use_column_width=50)
+st.image("optena.jpg", use_column_width=5)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # Display the logo centered at the top using HTML and CSS
