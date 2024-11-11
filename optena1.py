@@ -10,8 +10,29 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_icon="favicon.ico", layout="wide")
 
 
+# Display the logo centered at the top using HTML and CSS
+st.markdown(
+    """
+    <style>
+    .centered-logo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+    }
+    .centered-logo img {
+        height: auto; /* Keeps original height-to width ratio */
+    }
+    </style>
+    <div class="centered-logo">
+        <img src="logo.jpg" alt="OPTENA Logo">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 # Display the logo at the top of the page
-st.image("optena.jpg", use_column_width=200)  
+#st.image("optena.jpg", use_column_width=200)  
 
 # Adjust 'use_column_width' if you want it to scale to the page width
 
