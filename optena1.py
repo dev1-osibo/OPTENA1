@@ -10,27 +10,46 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_icon="favicon.ico", layout="wide")
 
 
-# Display the logo centered at the top using HTML and CSS
+# Center the image using CSS
 st.markdown(
     """
     <style>
-    .centered-logo {
+    .centered-image {
         display: flex;
         justify-content: center;
-        align-items: center;
         margin-top: 10px;
     }
-    .centered-logo img {
-        max-width: 300px; /* Adjust size as needed, or remove for original size */
-        width: 100%;
-        height: auto; /* Keeps original height-to-width ratio */    }
     </style>
-    <div class="centered-logo">
-        <img src="optena.jpg" alt="OPTENA Logo">
-    </div>
     """,
     unsafe_allow_html=True
 )
+
+# Display the image, wrapped in a div with the custom CSS class
+st.markdown('<div class="centered-image">', unsafe_allow_html=True)
+st.image("optena.jpg", use_column_width=100)
+st.markdown('</div>', unsafe_allow_html=True)
+
+# Display the logo centered at the top using HTML and CSS
+#st.markdown(
+#    """
+#    <style>
+#   .centered-logo {
+#        display: flex;
+#        justify-content: center;
+#        align-items: center;
+#        margin-top: 10px;
+#    }
+#    .centered-logo img {
+#        max-width: 300px; /* Adjust size as needed, or remove for #original size */
+#        width: 100%;
+#        height: auto; /* Keeps original height-to-width ratio #*/    }
+#    </style>
+#    <div class="centered-logo">
+#        <img src="optena.jpg" alt="OPTENA Logo">
+#    </div>
+#    """,
+#    unsafe_allow_html=True
+#)
 
 # Display the logo at the top of the page
 #st.image("optena.jpg", use_column_width=200)  
