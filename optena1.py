@@ -5,9 +5,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Set the page configuration to include the title and favicon
-#st.set_page_config(page_title="OPTENA", page_icon="favicon.ico")
-
 # Set the page configuration
 st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", layout="wide")
 
