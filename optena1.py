@@ -10,59 +10,6 @@ import matplotlib.pyplot as plt
 st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_icon="favicon.ico", layout="wide")
 
 
-# Center the image using CSS
-#st.markdown(
-#    """
-#    <style>
-#    .centered-image {
-#        display: flex;
-#        justify-content: center;
-#        margin-top: 10px;
-#    }
-#    </style>
-#    """,
-#    unsafe_allow_html=True
-#)
-
-# Display the image, wrapped in a div with the custom CSS class
-#st.markdown('<div class="centered-image">', #unsafe_allow_html=True)
-#st.image("optena.jpg", use_column_width=5)
-#st.markdown('</div>', unsafe_allow_html=True)
-
-# Display the logo centered at the top using HTML and CSS
-#st.markdown(
-#    """
-#    <style>
-#   .centered-logo {
-#        display: flex;
-#        justify-content: center;
-#        align-items: center;
-#        margin-top: 10px;
-#    }
-#    .centered-logo img {
-#        max-width: 300px; /* Adjust size as needed, or remove for #original size */
-#        width: 100%;
-#        height: auto; /* Keeps original height-to-width ratio #*/    }
-#    </style>
-#    <div class="centered-logo">
-#        <img src="optena.jpg" alt="OPTENA Logo">
-#    </div>
-#    """,
-#    unsafe_allow_html=True
-#)
-
-# Display the logo at the top of the page
-#st.image("optena.jpg", use_column_width=200)  
-
-# Adjust 'use_column_width' if you want it to scale to the page width
-
-
-# Set the page configuration to include the title and favicon
-#st.set_page_config(page_title="OPTENA", page_icon="favicon.ico")
-
-# Set the page configuration
-#st.set_page_config(page_title="OPTENA: Data Center Energy #Optimization", layout="wide")
-
 # App Header
 st.markdown(
     "<h1 style='text-align: center; color: #4CAF50; font-size: 20em;'>OPTENA</h1>",
@@ -72,14 +19,6 @@ st.markdown(
     "<h2 style='text-align: center; color: #555;'>Data Center Energy Optimization Simulator</h2>",
     unsafe_allow_html=True
 )
-#st.markdown("""
-#<div style='text-align: center; color: #666; font-size: 1.1em; #max-width: 800px; margin: 0 auto;'>
-#This app optimizes data center workloads by shifting them to #periods of higher renewable energy availability, reducing costs #and emissions. 
-#Adjust parameters and upload data to explore the impact of #optimization in real-time.
-#</div>
-#""",
-#unsafe_allow_html=True
-#)
 
 # Function to load data
 def load_data(file, file_type="csv"):
@@ -261,8 +200,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
-
 
 
 
