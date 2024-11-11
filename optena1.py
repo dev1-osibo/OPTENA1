@@ -25,7 +25,7 @@ st.markdown(
     }
     </style>
     <div class="centered-logo">
-        <img src="logo.jpg" alt="OPTENA Logo">
+        <img src="optena.jpg" alt="OPTENA Logo">
     </div>
     """,
     unsafe_allow_html=True
