@@ -9,6 +9,13 @@ import matplotlib.pyplot as plt
 # Set the page configuration (only call this once)
 st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_icon="favicon.ico", layout="wide")
 
+
+# Display the logo at the top of the page
+st.image("optena.jpg", use_column_width=True)  
+
+# Adjust 'use_column_width' if you want it to scale to the page width
+
+
 # Set the page configuration to include the title and favicon
 #st.set_page_config(page_title="OPTENA", page_icon="favicon.ico")
 
@@ -190,3 +197,31 @@ if st.sidebar.button('Run Simulation'):
     #st.write("This chart compares baseline vs. optimized energy #consumption over time.")
     #data['Optimized Energy (kWh)'] = #simulation_results['optimized_energy']
     #st.line_chart(data[['Workload Energy Consumption (kWh)', #'Optimized Energy (kWh)']])
+
+
+
+# Footer with your name and email
+st.markdown(
+    """
+    <style>
+    .footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        text-align: center;
+        font-size: small;
+        color: grey;
+        padding: 10px;
+    }
+    </style>
+    <div class="footer">
+        Built by - Babasola Osibo | Email - <a href="mailto:babasolao@optena.app">babasolao@optena.app</a>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+
+
+
