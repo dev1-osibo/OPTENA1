@@ -21,8 +21,9 @@ st.markdown(
         margin-top: 10px;
     }
     .centered-logo img {
-        height: auto; /* Keeps original height-to width ratio */
-    }
+        max-width: 300px; /* Adjust size as needed, or remove for original size */
+        width: 100%;
+        height: auto; /* Keeps original height-to-width ratio */    }
     </style>
     <div class="centered-logo">
         <img src="optena.jpg" alt="OPTENA Logo">
