@@ -162,7 +162,7 @@ renewable_threshold = st.sidebar.slider(
     min_value=round(renewable_min, 1),
     max_value=round(renewable_max, 1),
     value=round((renewable_min + renewable_max) / 2, 1),
-    step=1
+    step=1.0
 ) / 100
 
 
