@@ -173,10 +173,10 @@ if st.sidebar.button('Run Simulation'):
     )
 
     # Display charts comparing baseline and optimized metrics
-    st.subheader("Energy Comparison")
-    st.write("This chart compares baseline vs. optimized energy #consumption over time.")
-    data['Optimized Energy (kWh)'] = #simulation_results['optimized_energy']
-    st.line_chart(data[['Workload Energy Consumption (kWh)', #'Optimized Energy (kWh)']])
+    #st.subheader("Energy Comparison")
+    #st.write("This chart compares baseline vs. optimized energy #consumption over time.")
+    #data['Optimized Energy (kWh)'] = #simulation_results['optimized_energy']
+    #st.line_chart(data[['Workload Energy Consumption (kWh)', #'Optimized Energy (kWh)']])
 
 
 
