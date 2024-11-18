@@ -238,8 +238,6 @@ if st.sidebar.button('Run Simulation'):
 # Adjust x-axis labels
 plt.xticks(rotation=45, fontsize=8)  # Rotate labels and adjust font size
 plt.tight_layout()  # Automatically adjust layout to prevent clipping
-
-
     st.pyplot(plt)
 
 # Footer with your name and email
