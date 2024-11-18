@@ -211,20 +211,40 @@ if st.sidebar.button('Run Simulation'):
     st.header("Optimized Metrics")
     col1, col2, col3 = st.columns(3)
 
-    # Energy Savings
-    energy_savings = simulation_results['energy_savings']
-    energy_color = "inverse" if energy_savings > 0 else "normal"
-    col1.metric("Optimized Energy Consumption (kWh)", f"{simulation_results['optimized_energy']:.2f}", delta=f"{abs(energy_savings):.2f} kWh saved", delta_color=energy_color)
+# Energy Savings
+energy_savings = simulation_results['energy_savings']
+energy_percentage = (energy_savings / baseline_results['total_energy'] * 100) if baseline_results['total_energy'] > 0 else 0
+energy_color = "inverse" if energy_savings > 0 else "normal"
+col1.metric(
+    "Optimized Energy Consumption (kWh)",
+    f"{simulation_results['optimized_energy']:.2f}",
+    delta=f"{abs(energy_savings):.2f} kWh saved ({energy_percentage:.2f}%)",
+    delta_color=energy_color
+)
 
-    # Cost Savings
-    cost_savings = simulation_results['cost_savings']
-    cost_color = "inverse" if cost_savings > 0 else "normal"
-    col2.metric("Optimized Cost ($)", f"{simulation_results['optimized_cost']:.2f}", delta=f"${abs(cost_savings):.2f} saved", delta_color=cost_color)
 
-    # Emissions Savings
-    emissions_savings = simulation_results['emissions_savings']
-    emissions_color = "inverse" if emissions_savings > 0 else "normal"
-    col3.metric("Optimized CO? Emissions (kg)", f"{simulation_results['optimized_emissions']:.2f}", delta=f"{abs(emissions_savings):.2f} kg CO? reduced", delta_color=emissions_color)
+# Cost Savings
+cost_savings = simulation_results['cost_savings']
+cost_percentage = (cost_savings / baseline_results['total_cost'] * 100) if baseline_results['total_cost'] > 0 else 0
+cost_color = "inverse" if cost_savings > 0 else "normal"
+col2.metric(
+    "Optimized Cost ($)",
+    f"{simulation_results['optimized_cost']:.2f}",
+    delta=f"${abs(cost_savings):.2f} saved ({cost_percentage:.2f}%)",
+    delta_color=cost_color
+)
+
+
+# Emissions Savings
+emissions_savings = simulation_results['emissions_savings']
+emissions_percentage = (emissions_savings / baseline_results['total_emissions'] * 100) if baseline_results['total_emissions'] > 0 else 0
+emissions_color = "inverse" if emissions_savings > 0 else "normal"
+col3.metric(
+    "Optimized CO? Emissions (kg)",
+    f"{simulation_results['optimized_emissions']:.2f}",
+    delta=f"{abs(emissions_savings):.2f} kg CO? reduced ({emissions_percentage:.2f}%)",
+    delta_color=emissions_color
+)
 
     # Display energy comparison chart
     st.subheader("Energy Comparison")
