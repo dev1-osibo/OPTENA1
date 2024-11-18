@@ -234,7 +234,6 @@ col2.metric(
     delta_color=cost_color
 )
 
-
 # Emissions Savings
 emissions_savings = simulation_results['emissions_savings']
 emissions_percentage = (emissions_savings / baseline_results['total_emissions'] * 100) if baseline_results['total_emissions'] > 0 else 0
@@ -246,15 +245,15 @@ col3.metric(
     delta_color=emissions_color
 )
 
-    # Display energy comparison chart
-    st.subheader("Energy Comparison")
-    plt.figure(figsize=(10, 6))
-    plt.plot(data.index, data['Workload Energy Consumption (kWh)'], label='Baseline Energy')
-    plt.plot(data.index, data['Optimized Energy'], label='Optimized Energy', linestyle='--')
-    plt.xlabel('Time')
-    plt.ylabel('Energy Consumption (kWh)')
-    plt.title('Baseline vs. Optimized Energy Consumption')
-    plt.legend()
+# Display energy comparison chart
+st.subheader("Energy Comparison")
+plt.figure(figsize=(10, 6))
+plt.plot(data.index, data['Workload Energy Consumption (kWh)'], label='Baseline Energy')
+plt.plot(data.index, data['Optimized Energy'], label='Optimized Energy', linestyle='--')
+plt.xlabel('Time')
+plt.ylabel('Energy Consumption (kWh)')
+plt.title('Baseline vs. Optimized Energy Consumption')
+plt.legend()
 
 # Adjust x-axis labels
 plt.xticks(rotation=45, fontsize=8)  # Rotate labels and adjust font size
