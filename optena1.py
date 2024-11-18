@@ -235,10 +235,13 @@ if st.sidebar.button('Run Simulation'):
     plt.ylabel('Energy Consumption (kWh)')
     plt.title('Baseline vs. Optimized Energy Consumption')
     plt.legend()
+
 # Adjust x-axis labels
 plt.xticks(rotation=45, fontsize=8)  # Rotate labels and adjust font size
 plt.tight_layout()  # Automatically adjust layout to prevent clipping
-    st.pyplot(plt)
+
+# Display the plot
+st.pyplot(plt)  # Make sure this is indented to the same level as the preceding block
 
 # Footer with your name and email
 st.markdown(
