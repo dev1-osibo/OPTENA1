@@ -167,19 +167,32 @@ renewable_threshold = st.sidebar.slider(
 
 
 # Tips Section
-st.sidebar.markdown("### Tips")
 st.sidebar.markdown(
     """
-    **For Maximum Cost Savings**:
-    - Use a **high energy price** and a **high renewable threshold** to leverage times when renewable energy is more available, which reduces overall consumption during low-renewable periods.
-    
-    **For Maximum Emission Reductions**:
-    - Set a **high emission factor for non-renewables** and a **low emission factor for renewables**. Combine this with a **high renewable threshold** to shift more energy usage to renewable-heavy periods, maximizing CO? savings.
-    
-    **Balanced Cost and Emission Reduction**:
-    - Adjust the **renewable threshold** based on current emission factors. If emission factors are high for both renewables and non-renewables, a **moderate threshold** can help achieve balanced reductions in both cost and emissions.
-    """
+    <style>
+    .tips-section {
+        font-size: 12px; /* Adjust the font size as needed */
+        color: #555; /* Optional: Adjust the text color */
+    }
+    </style>
+    <div class="tips-section">
+        <b>For Maximum Cost Savings:</b>
+        <ul>
+            <li>Use a <b>high energy price</b> and a <b>high renewable threshold</b> to leverage times when renewable energy is more available, which reduces overall consumption during low-renewable periods.</li>
+        </ul>
+        <b>For Maximum Emission Reductions:</b>
+        <ul>
+            <li>Set a <b>high emission factor for non-renewables</b> and a <b>low emission factor for renewables</b>. Combine this with a <b>high renewable threshold</b> to shift more energy usage to renewable-heavy periods, maximizing CO? savings.</li>
+        </ul>
+        <b>Balanced Cost and Emission Reduction:</b>
+        <ul>
+            <li>Adjust the <b>renewable threshold</b> based on current emission factors. If emission factors are high for both renewables and non-renewables, a <b>moderate threshold</b> can help achieve balanced reductions in both cost and emissions.</li>
+        </ul>
+    </div>
+    """,
+    unsafe_allow_html=True
 )
+
 
 # Calculate and display baseline metrics
 baseline_results = calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable)
@@ -222,6 +235,11 @@ if st.sidebar.button('Run Simulation'):
     plt.ylabel('Energy Consumption (kWh)')
     plt.title('Baseline vs. Optimized Energy Consumption')
     plt.legend()
+# Adjust x-axis labels
+plt.xticks(rotation=45, fontsize=8)  # Rotate labels and adjust font size
+plt.tight_layout()  # Automatically adjust layout to prevent clipping
+
+
     st.pyplot(plt)
 
 # Footer with your name and email
