@@ -136,7 +136,35 @@ energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=r
 emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewable (kg CO? per kWh)", min_value=0.1, max_value=1.0, value=0.5, step=0.05)
 emission_factor_renewable = st.sidebar.slider("Emission Factor for Renewable (kg CO? per kWh)", min_value=0.0, max_value=0.5, value=0.02, step=0.01)
 
-renewable_threshold = st.sidebar.slider("Renewable Energy Availability Threshold (%)", min_value=round(renewable_min, 1), max_value=round(renewable_max, 1), value=round((renewable_min + renewable_max) / 2, 1), step=1) / 100
+
+
+# Calculate renewable min and max values
+renewable_min = data['Renewable Availability (%)'].min()
+renewable_max = data['Renewable Availability (%)'].max()
+
+# Debugging: Validate the min and max
+st.write("Renewable Min:", renewable_min)
+st.write("Renewable Max:", renewable_max)
+
+# Handle invalid or missing data
+if renewable_min is None or renewable_max is None or renewable_min > renewable_max:
+    st.error("Invalid Renewable Availability data: Check the input dataset.")
+    st.stop()
+
+# Provide default values if min == max
+if renewable_min == renewable_max:
+    renewable_min = 0
+    renewable_max = 100
+
+# Define slider with valid range
+renewable_threshold = st.sidebar.slider(
+    "Renewable Energy Availability Threshold (%)",
+    min_value=round(renewable_min, 1),
+    max_value=round(renewable_max, 1),
+    value=round((renewable_min + renewable_max) / 2, 1),
+    step=1
+) / 100
+
 
 # Tips Section
 st.sidebar.markdown("### Tips")
