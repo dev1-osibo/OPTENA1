@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 
 
 # Set the page configuration (only call this once)
-st.set_page_config(page_title="OPTENA: Data Center Energy Optimization", page_icon="favicon.ico", layout="wide")
+st.set_page_config(page_title="OPTENA: Energy Optimization Systems", page_icon="favicon.ico", layout="wide")
 
 
 # App Header
 st.markdown(
-    "<h1 style='text-align: center; color: #4CAF50; font-size: 20em;'>OPTENA</h1>",
+    "<h1 style='text-align: center; color: #4CAF50; font-size: 15em;'>OPTENA</h1>",
     unsafe_allow_html=True
 )
 st.markdown(
@@ -143,12 +143,22 @@ if st.sidebar.button('Run Simulation'):
     col1, col2, col3 = st.columns(3)
 
     # Energy Savings
+    #energy_savings = simulation_results['energy_savings']
+    #energy_color = "inverse" if energy_savings > 0 else "normal"
+    #col1.metric(
+        #"Optimized Energy Consumption (kWh)", 
+        #f"{simulation_results['optimized_energy']:.2f}", 
+        #delta=f"{abs(energy_savings):.2f} kWh saved" if #energy_savings > 0 else f"{abs(energy_savings):.2f} kWh #increased",
+        #delta_color=energy_color
+    #)
+
+    # Energy Savings
     energy_savings = simulation_results['energy_savings']
     energy_color = "inverse" if energy_savings > 0 else "normal"
     col1.metric(
         "Optimized Energy Consumption (kWh)", 
         f"{simulation_results['optimized_energy']:.2f}", 
-        delta=f"{abs(energy_savings):.2f} kWh saved" if energy_savings > 0 else f"{abs(energy_savings):.2f} kWh increased",
+        delta=f"{abs(energy_savings):.2f} kWh saved ({(energy_savings / baseline_results['total_energy'] * 100):.2f}%)" if energy_savings > 0 else f"{abs(energy_savings):.2f} kWh increased",
         delta_color=energy_color
     )
 
@@ -158,26 +168,59 @@ if st.sidebar.button('Run Simulation'):
     col2.metric(
         "Optimized Cost ($)", 
         f"{simulation_results['optimized_cost']:.2f}", 
-        delta=f"${abs(cost_savings):.2f} saved" if cost_savings > 0 else f"${abs(cost_savings):.2f} increased",
+        delta=f"${abs(cost_savings):.2f} saved ({(cost_savings / baseline_results['total_cost'] * 100):.2f}%)" if cost_savings > 0 else f"${abs(cost_savings):.2f} increased",
         delta_color=cost_color
     )
+
+    # Cost Savings
+    #cost_savings = simulation_results['cost_savings']
+    #cost_color = "inverse" if cost_savings > 0 else "normal"
+    #col2.metric(
+        #"Optimized Cost ($)", 
+        #f"{simulation_results['optimized_cost']:.2f}", 
+        #delta=f"${abs(cost_savings):.2f} saved" if cost_savings > #0 else f"${abs(cost_savings):.2f} increased",
+        #delta_color=cost_color
+    #)
 
     # Emissions Savings
     emissions_savings = simulation_results['emissions_savings']
     emissions_color = "inverse" if emissions_savings > 0 else "normal"
     col3.metric(
-        "Optimized CO₂ Emissions (kg)", 
+        "Optimized CO? Emissions (kg)", 
         f"{simulation_results['optimized_emissions']:.2f}", 
-        delta=f"{abs(emissions_savings):.2f} kg CO₂ reduced" if emissions_savings > 0 else f"{abs(emissions_savings):.2f} kg CO₂ increased",
+        delta=f"{abs(emissions_savings):.2f} kg CO? reduced ({(emissions_savings / baseline_results['total_emissions'] * 100):.2f}%)" if emissions_savings > 0 else f"{abs(emissions_savings):.2f} kg CO? increased",
         delta_color=emissions_color
     )
+
+
+    # Emissions Savings
+    #emissions_savings = simulation_results['emissions_savings']
+    #emissions_color = "inverse" if emissions_savings > 0 else #"normal"
+    #col3.metric(
+        #"Optimized CO₂ Emissions (kg)", 
+        #f"{simulation_results['optimized_emissions']:.2f}", 
+        #delta=f"{abs(emissions_savings):.2f} kg CO₂ reduced" if #emissions_savings > 0 else f"{abs(emissions_savings):.2f} kg #CO₂ increased",
+        #delta_color=emissions_color
+    #)
+
+    # Display charts comparing baseline and optimized metrics
+    st.subheader("Energy Comparison")
+    st.write("This chart compares baseline vs. optimized energy consumption over time.")
+    data['Optimized Energy (kWh)'] = simulation_results['optimized_energy']
+    plt.figure(figsize=(10, 6))
+    plt.plot(data.index, data['Workload Energy Consumption (kWh)'], label='Baseline Energy')
+    plt.plot(data.index, data['Optimized Energy (kWh)'], label='Optimized Energy', linestyle='--')
+    plt.xlabel('Time')
+    plt.ylabel('Energy Consumption (kWh)')
+    plt.title('Baseline vs. Optimized Energy Consumption')
+    plt.legend()
+    st.pyplot(plt)
 
     # Display charts comparing baseline and optimized metrics
     #st.subheader("Energy Comparison")
     #st.write("This chart compares baseline vs. optimized energy #consumption over time.")
     #data['Optimized Energy (kWh)'] = #simulation_results['optimized_energy']
     #st.line_chart(data[['Workload Energy Consumption (kWh)', #'Optimized Energy (kWh)']])
-
 
 
 # Footer with your name and email
