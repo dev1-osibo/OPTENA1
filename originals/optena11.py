@@ -5,8 +5,10 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 # Set the page configuration (only call this once)
 st.set_page_config(page_title="OPTENA: Energy Optimization Systems", page_icon="favicon.ico", layout="wide")
+
 
 # App Header
 st.markdown(
@@ -34,27 +36,6 @@ def load_data(file, file_type="csv"):
     
     return data
 
-# Standardize column names for compatibility
-def standardize_columns(data):
-    required_columns = {
-        'Renewable Availability (%)': ['Renewable Availability', 'Renewables (%)'],
-        'Workload Energy Consumption (kWh)': ['Workload Consumption', 'Energy (kWh)'],
-        'Energy Price ($/kWh)': ['Energy Price', 'Price ($)'],
-    }
-
-    for standard_col, possible_names in required_columns.items():
-        for col in possible_names:
-            if col in data.columns:
-                data.rename(columns={col: standard_col}, inplace=True)
-                break
-
-    missing_columns = [col for col in required_columns.keys() if col not in data.columns]
-    if missing_columns:
-        st.error(f"The following required columns are missing: {', '.join(missing_columns)}")
-        st.stop()
-
-    return data
-
 # Baseline calculation function
 def calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable):
     total_energy = data['Workload Energy Consumption (kWh)'].sum()
@@ -68,11 +49,6 @@ def calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable
 
 # Simulation function for optimization
 def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable):
-    # Adjust threshold if it's below data's minimum
-    if renewable_threshold < data['Renewable Availability (%)'].min():
-        st.warning("Renewable threshold is lower than the data's minimum renewable availability. Using minimum value as threshold.")
-        renewable_threshold = data['Renewable Availability (%)'].min()
-
     # Step 1: Calculate baseline emissions
     data['Baseline Emissions'] = (
         data['Workload Energy Consumption (kWh)'] * emission_factor_non_renewable * 
@@ -85,7 +61,7 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
     data['Optimized Energy'] = np.where(
         data['Renewable Availability (%)'] >= renewable_threshold * 100, 
         data['Workload Energy Consumption (kWh)'], 
-        data['Workload Energy Consumption (kWh)'] * 0.9
+        data['Workload Energy Consumption (kWh)'] * 0.9  # Reduce energy usage if renewables are unavailable
     )
 
     # Recalculate emissions after optimization
@@ -118,25 +94,15 @@ else:
     st.sidebar.write("Using default synthetic dataset.")
     data = load_data('synthetic_data_center_data.csv', file_type="csv")
 
-# Standardize columns and validate the dataset
-data = standardize_columns(data)
-
 # Display loaded data preview
 st.write("Loaded Data Preview:", data.head())
 
-# Sidebar sliders dynamically adjusted to data
-energy_price_min = data['Energy Price ($/kWh)'].min()
-energy_price_max = data['Energy Price ($/kWh)'].max()
+# Sidebar sliders for adjustable parameters
+energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=0.05, max_value=1.00, value=0.1, step=0.01)
+emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewable (kg CO₂ per kWh)", min_value=0.1, max_value=1.0, value=0.5, step=0.05)
+emission_factor_renewable = st.sidebar.slider("Emission Factor for Renewable (kg CO₂ per kWh)", min_value=0.0, max_value=0.5, value=0.02, step=0.01)
+renewable_threshold = st.sidebar.slider("Renewable Energy Availability Threshold (%)", min_value=0, max_value=100, value=70, step=5) / 100
 
-renewable_min = data['Renewable Availability (%)'].min()
-renewable_max = data['Renewable Availability (%)'].max()
-
-energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=round(energy_price_min, 2), max_value=round(energy_price_max, 2), value=round((energy_price_min + energy_price_max) / 2, 2), step=0.01)
-
-emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewable (kg CO? per kWh)", min_value=0.1, max_value=1.0, value=0.5, step=0.05)
-emission_factor_renewable = st.sidebar.slider("Emission Factor for Renewable (kg CO? per kWh)", min_value=0.0, max_value=0.5, value=0.02, step=0.01)
-
-renewable_threshold = st.sidebar.slider("Renewable Energy Availability Threshold (%)", min_value=round(renewable_min, 1), max_value=round(renewable_max, 1), value=round((renewable_min + renewable_max) / 2, 1), step=1) / 100
 
 # Tips Section
 st.sidebar.markdown("### Tips")
@@ -159,42 +125,103 @@ st.header("Baseline Metrics")
 col1, col2, col3 = st.columns(3)
 col1.metric("Total Energy Consumption (kWh)", f"{baseline_results['total_energy']:.2f}")
 col2.metric("Total Cost ($)", f"{baseline_results['total_cost']:.2f}")
-col3.metric("Total CO? Emissions (kg)", f"{baseline_results['total_emissions']:.2f}")
+col3.metric("Total CO₂ Emissions (kg)", f"{baseline_results['total_emissions']:.2f}")
 
 # Run the simulation and display optimized metrics
 if st.sidebar.button('Run Simulation'):
     with st.spinner('Running simulation...'):
-        simulation_results = run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable)
+        simulation_results = run_simulation(
+            data, 
+            renewable_threshold, 
+            energy_price_per_kwh, 
+            emission_factor_non_renewable, 
+            emission_factor_renewable
+        )
 
-    # Display optimized results side by side
+    # Display optimized results side by side in a consistent layout
     st.header("Optimized Metrics")
     col1, col2, col3 = st.columns(3)
 
     # Energy Savings
+    #energy_savings = simulation_results['energy_savings']
+    #energy_color = "inverse" if energy_savings > 0 else "normal"
+    #col1.metric(
+        #"Optimized Energy Consumption (kWh)", 
+        #f"{simulation_results['optimized_energy']:.2f}", 
+        #delta=f"{abs(energy_savings):.2f} kWh saved" if #energy_savings > 0 else f"{abs(energy_savings):.2f} kWh #increased",
+        #delta_color=energy_color
+    #)
+
+    # Energy Savings
     energy_savings = simulation_results['energy_savings']
     energy_color = "inverse" if energy_savings > 0 else "normal"
-    col1.metric("Optimized Energy Consumption (kWh)", f"{simulation_results['optimized_energy']:.2f}", delta=f"{abs(energy_savings):.2f} kWh saved", delta_color=energy_color)
+    col1.metric(
+        "Optimized Energy Consumption (kWh)", 
+        f"{simulation_results['optimized_energy']:.2f}", 
+        delta=f"{abs(energy_savings):.2f} kWh saved ({(energy_savings / baseline_results['total_energy'] * 100):.2f}%)" if energy_savings > 0 else f"{abs(energy_savings):.2f} kWh increased",
+        delta_color=energy_color
+    )
 
     # Cost Savings
     cost_savings = simulation_results['cost_savings']
     cost_color = "inverse" if cost_savings > 0 else "normal"
-    col2.metric("Optimized Cost ($)", f"{simulation_results['optimized_cost']:.2f}", delta=f"${abs(cost_savings):.2f} saved", delta_color=cost_color)
+    col2.metric(
+        "Optimized Cost ($)", 
+        f"{simulation_results['optimized_cost']:.2f}", 
+        delta=f"${abs(cost_savings):.2f} saved ({(cost_savings / baseline_results['total_cost'] * 100):.2f}%)" if cost_savings > 0 else f"${abs(cost_savings):.2f} increased",
+        delta_color=cost_color
+    )
+
+    # Cost Savings
+    #cost_savings = simulation_results['cost_savings']
+    #cost_color = "inverse" if cost_savings > 0 else "normal"
+    #col2.metric(
+        #"Optimized Cost ($)", 
+        #f"{simulation_results['optimized_cost']:.2f}", 
+        #delta=f"${abs(cost_savings):.2f} saved" if cost_savings > #0 else f"${abs(cost_savings):.2f} increased",
+        #delta_color=cost_color
+    #)
 
     # Emissions Savings
     emissions_savings = simulation_results['emissions_savings']
     emissions_color = "inverse" if emissions_savings > 0 else "normal"
-    col3.metric("Optimized CO? Emissions (kg)", f"{simulation_results['optimized_emissions']:.2f}", delta=f"{abs(emissions_savings):.2f} kg CO? reduced", delta_color=emissions_color)
+    col3.metric(
+        "Optimized CO? Emissions (kg)", 
+        f"{simulation_results['optimized_emissions']:.2f}", 
+        delta=f"{abs(emissions_savings):.2f} kg CO? reduced ({(emissions_savings / baseline_results['total_emissions'] * 100):.2f}%)" if emissions_savings > 0 else f"{abs(emissions_savings):.2f} kg CO? increased",
+        delta_color=emissions_color
+    )
 
-    # Display energy comparison chart
+
+    # Emissions Savings
+    #emissions_savings = simulation_results['emissions_savings']
+    #emissions_color = "inverse" if emissions_savings > 0 else #"normal"
+    #col3.metric(
+        #"Optimized CO₂ Emissions (kg)", 
+        #f"{simulation_results['optimized_emissions']:.2f}", 
+        #delta=f"{abs(emissions_savings):.2f} kg CO₂ reduced" if #emissions_savings > 0 else f"{abs(emissions_savings):.2f} kg #CO₂ increased",
+        #delta_color=emissions_color
+    #)
+
+    # Display charts comparing baseline and optimized metrics
     st.subheader("Energy Comparison")
+    st.write("This chart compares baseline vs. optimized energy consumption over time.")
+    data['Optimized Energy (kWh)'] = simulation_results['optimized_energy']
     plt.figure(figsize=(10, 6))
     plt.plot(data.index, data['Workload Energy Consumption (kWh)'], label='Baseline Energy')
-    plt.plot(data.index, data['Optimized Energy'], label='Optimized Energy', linestyle='--')
+    plt.plot(data.index, data['Optimized Energy (kWh)'], label='Optimized Energy', linestyle='--')
     plt.xlabel('Time')
     plt.ylabel('Energy Consumption (kWh)')
     plt.title('Baseline vs. Optimized Energy Consumption')
     plt.legend()
     st.pyplot(plt)
+
+    # Display charts comparing baseline and optimized metrics
+    #st.subheader("Energy Comparison")
+    #st.write("This chart compares baseline vs. optimized energy #consumption over time.")
+    #data['Optimized Energy (kWh)'] = #simulation_results['optimized_energy']
+    #st.line_chart(data[['Workload Energy Consumption (kWh)', #'Optimized Energy (kWh)']])
+
 
 # Footer with your name and email
 st.markdown(
@@ -216,3 +243,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+
+
