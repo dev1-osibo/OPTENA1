@@ -136,8 +136,6 @@ energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=r
 emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewable (kg CO? per kWh)", min_value=0.1, max_value=1.0, value=0.5, step=0.05)
 emission_factor_renewable = st.sidebar.slider("Emission Factor for Renewable (kg CO? per kWh)", min_value=0.0, max_value=0.5, value=0.02, step=0.01)
 
-
-
 # Calculate renewable min and max values
 renewable_min = data['Renewable Availability (%)'].min()
 renewable_max = data['Renewable Availability (%)'].max()
@@ -193,7 +191,6 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-
 # Calculate and display baseline metrics
 baseline_results = calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable)
 st.header("Baseline Metrics")
@@ -202,65 +199,69 @@ col1.metric("Total Energy Consumption (kWh)", f"{baseline_results['total_energy'
 col2.metric("Total Cost ($)", f"{baseline_results['total_cost']:.2f}")
 col3.metric("Total CO? Emissions (kg)", f"{baseline_results['total_emissions']:.2f}")
 
+
 # Run the simulation and display optimized metrics
 if st.sidebar.button('Run Simulation'):
     with st.spinner('Running simulation...'):
-        simulation_results = run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable)
+        simulation_results = run_simulation(
+            data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable
+        )
 
     # Display optimized results side by side
     st.header("Optimized Metrics")
     col1, col2, col3 = st.columns(3)
 
-# Energy Savings
-energy_savings = simulation_results['energy_savings']
-energy_percentage = (energy_savings / baseline_results['total_energy'] * 100) if baseline_results['total_energy'] > 0 else 0
-energy_color = "inverse" if energy_savings > 0 else "normal"
-col1.metric(
-    "Optimized Energy Consumption (kWh)",
-    f"{simulation_results['optimized_energy']:.2f}",
-    delta=f"{abs(energy_savings):.2f} kWh saved ({energy_percentage:.2f}%)",
-    delta_color=energy_color
-)
+    # Energy Savings
+    energy_savings = simulation_results['energy_savings']
+    energy_percentage = (energy_savings / baseline_results['total_energy'] * 100) if baseline_results['total_energy'] > 0 else 0
+    energy_color = "inverse" if energy_savings > 0 else "normal"
+    col1.metric(
+        "Optimized Energy Consumption (kWh)",
+        f"{simulation_results['optimized_energy']:.2f}",
+        delta=f"{abs(energy_savings):.2f} kWh saved ({energy_percentage:.2f}%)",
+        delta_color=energy_color
+    )
 
+    # Cost Savings
+    cost_savings = simulation_results['cost_savings']
+    cost_percentage = (cost_savings / baseline_results['total_cost'] * 100) if baseline_results['total_cost'] > 0 else 0
+    cost_color = "inverse" if cost_savings > 0 else "normal"
+    col2.metric(
+        "Optimized Cost ($)",
+        f"{simulation_results['optimized_cost']:.2f}",
+        delta=f"${abs(cost_savings):.2f} saved ({cost_percentage:.2f}%)",
+        delta_color=cost_color
+    )
 
-# Cost Savings
-cost_savings = simulation_results['cost_savings']
-cost_percentage = (cost_savings / baseline_results['total_cost'] * 100) if baseline_results['total_cost'] > 0 else 0
-cost_color = "inverse" if cost_savings > 0 else "normal"
-col2.metric(
-    "Optimized Cost ($)",
-    f"{simulation_results['optimized_cost']:.2f}",
-    delta=f"${abs(cost_savings):.2f} saved ({cost_percentage:.2f}%)",
-    delta_color=cost_color
-)
+    # Emissions Savings
+    emissions_savings = simulation_results['emissions_savings']
+    emissions_percentage = (emissions_savings / baseline_results['total_emissions'] * 100) if baseline_results['total_emissions'] > 0 else 0
+    emissions_color = "inverse" if emissions_savings > 0 else "normal"
+    col3.metric(
+        "Optimized CO? Emissions (kg)",
+        f"{simulation_results['optimized_emissions']:.2f}",
+        delta=f"{abs(emissions_savings):.2f} kg CO? reduced ({emissions_percentage:.2f}%)",
+        delta_color=emissions_color
+    )
 
-# Emissions Savings
-emissions_savings = simulation_results['emissions_savings']
-emissions_percentage = (emissions_savings / baseline_results['total_emissions'] * 100) if baseline_results['total_emissions'] > 0 else 0
-emissions_color = "inverse" if emissions_savings > 0 else "normal"
-col3.metric(
-    "Optimized CO? Emissions (kg)",
-    f"{simulation_results['optimized_emissions']:.2f}",
-    delta=f"{abs(emissions_savings):.2f} kg CO? reduced ({emissions_percentage:.2f}%)",
-    delta_color=emissions_color
-)
+    # Display energy comparison chart
+    st.subheader("Energy Comparison")
+    plt.figure(figsize=(10, 6))
+    plt.plot(data.index, data['Workload Energy Consumption (kWh)'], label='Baseline Energy')
+    plt.plot(data.index, data['Optimized Energy'], label='Optimized Energy', linestyle='--')
+    plt.xlabel('Time')
+    plt.ylabel('Energy Consumption (kWh)')
+    plt.title('Baseline vs. Optimized Energy Consumption')
+    plt.legend()
 
-# Display energy comparison chart
-st.subheader("Energy Comparison")
-plt.figure(figsize=(10, 6))
-plt.plot(data.index, data['Workload Energy Consumption (kWh)'], label='Baseline Energy')
-plt.plot(data.index, data['Optimized Energy'], label='Optimized Energy', linestyle='--')
-plt.xlabel('Time')
-plt.ylabel('Energy Consumption (kWh)')
-plt.title('Baseline vs. Optimized Energy Consumption')
-plt.legend()
+    # Adjust x-axis labels
+    plt.xticks(rotation=45, fontsize=8)  # Rotate labels and adjust font size
+    plt.tight_layout()  # Automatically adjust layout to prevent clipping
 
-# Adjust x-axis labels
-plt.xticks(rotation=45, fontsize=8)  # Rotate labels and adjust font size
-plt.tight_layout()  # Automatically adjust layout to prevent clipping
-
-# Display the plot
-st.pyplot(plt)  # Make sure this is indented to the same level as the preceding block
+    # Display the plot
+    st.pyplot(plt)
+else:
+    st.warning("Please click 'Run Simulation' to view results.")
 
 # Footer with your name and email
 st.markdown(
