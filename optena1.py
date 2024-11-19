@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-From prophet import Prophet
+from prophet import Prophet
 
 # Set the page configuration
 st.set_page_config(page_title="OPTENA: Energy Optimization Systems", page_icon="favicon.ico", layout="wide")
@@ -65,31 +65,26 @@ def calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable
 
 # Simulation function for optimization
 def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable):
-    # Adjust threshold if it's below data's minimum
     if renewable_threshold < data['Renewable Availability (%)'].min():
         st.warning("Renewable threshold is lower than the data's minimum renewable availability. Using minimum value as threshold.")
         renewable_threshold = data['Renewable Availability (%)'].min()
 
-    # Step 1: Calculate baseline emissions
     data['Baseline Emissions'] = (
         data['Workload Energy Consumption (kWh)'] * emission_factor_non_renewable * (1 - data['Renewable Availability (%)'] / 100) +
         data['Workload Energy Consumption (kWh)'] * emission_factor_renewable * (data['Renewable Availability (%)'] / 100)
     )
 
-    # Step 2: Optimize by favoring renewable hours
     data['Optimized Energy'] = np.where(
         data['Renewable Availability (%)'] >= renewable_threshold * 100,
         data['Workload Energy Consumption (kWh)'],
-        data['Workload Energy Consumption (kWh)'] * 0.9  # Example optimization factor
+        data['Workload Energy Consumption (kWh)'] * 0.9
     )
 
-    # Recalculate emissions after optimization
     data['Optimized Emissions'] = (
         data['Optimized Energy'] * emission_factor_non_renewable * (1 - data['Renewable Availability (%)'] / 100) +
         data['Optimized Energy'] * emission_factor_renewable * (data['Renewable Availability (%)'] / 100)
     )
 
-    # Calculate total values after optimization
     results = {
         'optimized_energy': data['Optimized Energy'].sum(),
         'optimized_cost': (data['Optimized Energy'] * energy_price_per_kwh).sum(),
@@ -99,18 +94,32 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
                         (data['Optimized Energy'] * energy_price_per_kwh).sum(),
         'emissions_savings': data['Baseline Emissions'].sum() - data['Optimized Emissions'].sum(),
     }
-    
     return results
 
-# Forecasting function using ARIMA
-#def forecast_arima(series, periods=365*24):
-    #model = ARIMA(series, order=(5, 1, 0))
-    #model_fit = model.fit()
-    #forecast = model_fit.forecast(steps=periods)
+# Forecasting function using Prophet
+def forecast_prophet(data, columns, periods=365*24):
+    """
+    Forecast future values for multiple columns using Prophet.
+    """
+    forecasts = {}
+    for column in columns:
+        # Prepare data for Prophet
+        prophet_data = data.reset_index()[['Timestamp', column]].rename(columns={'Timestamp': 'ds', column: 'y'})
+        
+        # Initialize and fit the Prophet model
+        model = Prophet()
+        model.fit(prophet_data)
+        
+        # Create future periods DataFrame
+        future = model.make_future_dataframe(periods=periods, freq='H')
+        
+        # Generate forecast
+        forecast = model.predict(future)
+        forecasts[column] = forecast[['ds', 'yhat']]
     
-    #return forecast
+    return forecasts
 
-# Sidebar Inputs: File Uploader (supports both .csv and .h5)
+# Sidebar Inputs: File Uploader
 uploaded_file = st.sidebar.file_uploader("Upload your data file", type=["csv", "h5"])
 if uploaded_file:
     file_type = "csv" if uploaded_file.name.endswith('.csv') else "h5"
@@ -119,13 +128,12 @@ else:
     st.sidebar.write("Using default synthetic dataset.")
     data = load_data('synthetic_data_center_data.csv', file_type="csv")
 
-# Standardize columns and validate the dataset
 data = standardize_columns(data)
 
 # Display loaded data preview
 st.write("Loaded Data Preview:", data.head())
 
-# Sidebar sliders dynamically adjusted to dataset values
+# Sidebar sliders dynamically adjusted
 energy_price_min = round(data['Energy Price ($/kWh)'].min(), 2)
 energy_price_max = round(data['Energy Price ($/kWh)'].max(), 2)
 renewable_min = round(data['Renewable Availability (%)'].min(), 1)
@@ -158,69 +166,46 @@ col3.metric("Total CO? Emissions (kg)", f"{baseline_results['total_emissions']:.
 
 # Run simulation and display optimized metrics
 if st.sidebar.button('Run Simulation'):
-    
     with st.spinner('Running simulation...'):
-        simulation_results = run_simulation(data, renewable_threshold,
-                                            energy_price_per_kwh,
-                                            emission_factor_non_renewable,
-                                            emission_factor_renewable)
+        simulation_results = run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable)
 
-        # Display optimized results side by side with baseline results
-        st.header("Optimized Metrics")
-        
-        col1.metric("Optimized Energy Consumption (kWh)", f"{simulation_results['optimized_energy']:.2f}",
-                    delta=f"{simulation_results['energy_savings']:.2f} kWh saved")
-        
-        col2.metric("Optimized Cost ($)", f"{simulation_results['optimized_cost']:.2f}",
-                    delta=f"${simulation_results['cost_savings']:.2f} saved")
-        
-        col3.metric("Optimized CO? Emissions (kg)", f"{simulation_results['optimized_emissions']:.2f}",
-                    delta=f"{simulation_results['emissions_savings']:.2f} kg CO? reduced")
+    st.subheader("Optimized Metrics")
+    col1, col2, col3 = st.columns(3)
 
-# Forecast future metrics using ARIMA model
-#if st.sidebar.button('Forecast Future Metrics'):
-    
-    #with st.spinner('Forecasting future metrics...'):
-        
-        # Forecast energy consumption using ARIMA model for one #year ahead (365*24 hours)
-        #energy_forecast = forecast_arima(data['Workload Energy #Consumption (kWh)'], periods=365*24)
-        
-        #cost_forecast = energy_forecast * energy_price_per_kwh
-        #emissions_forecast = energy_forecast * #emission_factor_non_renewable
+    # Energy Savings
+    energy_savings = simulation_results['energy_savings']
+    energy_percentage = (energy_savings / baseline_results['total_energy'] * 100) if baseline_results['total_energy'] > 0 else 0
+    col1.metric("Optimized Energy Consumption (kWh)", 
+                f"{simulation_results['optimized_energy']:.2f}",
+                delta=f"{energy_savings:.2f} kWh ({energy_percentage:.2f}%)")
 
-# Forecasting function using Prophet
-def forecast_prophet(data, column, periods=365*24):
-    """
-    Forecast future values using Prophet.
+    # Cost Savings
+    cost_savings = simulation_results['cost_savings']
+    cost_percentage = (cost_savings / baseline_results['total_cost'] * 100) if baseline_results['total_cost'] > 0 else 0
+    col2.metric("Optimized Cost ($)", 
+                f"{simulation_results['optimized_cost']:.2f}",
+                delta=f"${cost_savings:.2f} ({cost_percentage:.2f}%)")
 
-    Parameters:
-        data (pd.DataFrame): DataFrame with 'Timestamp' and the column to forecast.
-        column (str): Name of the column to forecast.
-        periods (int): Number of future periods (hours) to forecast.
+    # Emissions Savings
+    emissions_savings = simulation_results['emissions_savings']
+    emissions_percentage = (emissions_savings / baseline_results['total_emissions'] * 100) if baseline_results['total_emissions'] > 0 else 0
+    col3.metric("Optimized CO? Emissions (kg)", 
+                f"{simulation_results['optimized_emissions']:.2f}",
+                delta=f"{emissions_savings:.2f} kg CO? ({emissions_percentage:.2f}%)")
 
-    Returns:
-        pd.DataFrame: DataFrame with the forecasted values.
-    """
-    # Prepare data for Prophet
-    prophet_data = data.reset_index()[['Timestamp', column]].rename(columns={'Timestamp': 'ds', column: 'y'})
-    
-    # Initialize and fit the Prophet model
-    model = Prophet()
-    model.fit(prophet_data)
-    
-    # Create a DataFrame for future periods
-    future = model.make_future_dataframe(periods=periods, freq='H')
-    
-    # Generate forecast
-    forecast = model.predict(future)
-    return forecast
-        
-        # Plot forecasted results for energy consumption, cost and #emissions
-        
-        #plt.figure(figsize=(10, 6))
-        #plt.plot(energy_forecast.index, energy_forecast.values, #label='Forecasted Energy')
-        #plt.title('Forecasted Energy Consumption')
-        #plt.xlabel('Time')
-        #plt.ylabel('Energy Consumption (kWh)')
-        #plt.legend()
-        #st.pyplot(plt)
+# Forecast future metrics
+if st.sidebar.button('Forecast Future Metrics'):
+    with st.spinner('Forecasting future metrics...'):
+        columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
+        forecasts = forecast_prophet(data, columns_to_forecast)
+
+        st.header("Forecasted Metrics")
+        for column, forecast in forecasts.items():
+            st.write(f"Forecast for {column}:", forecast.head())
+            plt.figure(figsize=(10, 6))
+            plt.plot(forecast['ds'], forecast['yhat'], label=f"{column} Forecast")
+            plt.title(f"{column} Forecast")
+            plt.xlabel("Time")
+            plt.ylabel(column)
+            plt.legend()
+            st.pyplot(plt)
