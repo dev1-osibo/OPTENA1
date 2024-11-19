@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from statsmodels.tsa.arima.model import ARIMA
+From prophet import Prophet
 
 # Set the page configuration
 st.set_page_config(page_title="OPTENA: Energy Optimization Systems", page_icon="favicon.ico", layout="wide")
@@ -103,12 +103,12 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
     return results
 
 # Forecasting function using ARIMA
-def forecast_arima(series, periods=365*24):
-    model = ARIMA(series, order=(5, 1, 0))
-    model_fit = model.fit()
-    forecast = model_fit.forecast(steps=periods)
+#def forecast_arima(series, periods=365*24):
+    #model = ARIMA(series, order=(5, 1, 0))
+    #model_fit = model.fit()
+    #forecast = model_fit.forecast(steps=periods)
     
-    return forecast
+    #return forecast
 
 # Sidebar Inputs: File Uploader (supports both .csv and .h5)
 uploaded_file = st.sidebar.file_uploader("Upload your data file", type=["csv", "h5"])
@@ -178,22 +178,49 @@ if st.sidebar.button('Run Simulation'):
                     delta=f"{simulation_results['emissions_savings']:.2f} kg CO? reduced")
 
 # Forecast future metrics using ARIMA model
-if st.sidebar.button('Forecast Future Metrics'):
+#if st.sidebar.button('Forecast Future Metrics'):
     
-    with st.spinner('Forecasting future metrics...'):
+    #with st.spinner('Forecasting future metrics...'):
         
-        # Forecast energy consumption using ARIMA model for one year ahead (365*24 hours)
-        energy_forecast = forecast_arima(data['Workload Energy Consumption (kWh)'], periods=365*24)
+        # Forecast energy consumption using ARIMA model for one #year ahead (365*24 hours)
+        #energy_forecast = forecast_arima(data['Workload Energy #Consumption (kWh)'], periods=365*24)
         
-        cost_forecast = energy_forecast * energy_price_per_kwh
-        emissions_forecast = energy_forecast * emission_factor_non_renewable
+        #cost_forecast = energy_forecast * energy_price_per_kwh
+        #emissions_forecast = energy_forecast * #emission_factor_non_renewable
+
+# Forecasting function using Prophet
+def forecast_prophet(data, column, periods=365*24):
+    """
+    Forecast future values using Prophet.
+
+    Parameters:
+        data (pd.DataFrame): DataFrame with 'Timestamp' and the column to forecast.
+        column (str): Name of the column to forecast.
+        periods (int): Number of future periods (hours) to forecast.
+
+    Returns:
+        pd.DataFrame: DataFrame with the forecasted values.
+    """
+    # Prepare data for Prophet
+    prophet_data = data.reset_index()[['Timestamp', column]].rename(columns={'Timestamp': 'ds', column: 'y'})
+    
+    # Initialize and fit the Prophet model
+    model = Prophet()
+    model.fit(prophet_data)
+    
+    # Create a DataFrame for future periods
+    future = model.make_future_dataframe(periods=periods, freq='H')
+    
+    # Generate forecast
+    forecast = model.predict(future)
+    return forecast
         
-        # Plot forecasted results for energy consumption, cost and emissions
+        # Plot forecasted results for energy consumption, cost and #emissions
         
-        plt.figure(figsize=(10, 6))
-        plt.plot(energy_forecast.index, energy_forecast.values, label='Forecasted Energy')
-        plt.title('Forecasted Energy Consumption')
-        plt.xlabel('Time')
-        plt.ylabel('Energy Consumption (kWh)')
-        plt.legend()
-        st.pyplot(plt)
+        #plt.figure(figsize=(10, 6))
+        #plt.plot(energy_forecast.index, energy_forecast.values, #label='Forecasted Energy')
+        #plt.title('Forecasted Energy Consumption')
+        #plt.xlabel('Time')
+        #plt.ylabel('Energy Consumption (kWh)')
+        #plt.legend()
+        #st.pyplot(plt)
