@@ -194,10 +194,10 @@ if st.sidebar.button('Run Simulation'):
                 delta=f"{emissions_savings:.2f} kg CO? ({emissions_percentage:.2f}%)")
 
 # Forecast future metrics
-#if st.sidebar.button('Forecast Future Metrics'):
-    #with st.spinner('Forecasting future metrics...'):
-        #columns_to_forecast = ['Renewable Availability (%)', #'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
-        #forecasts = forecast_prophet(data, columns_to_forecast)
+if st.sidebar.button('Forecast Future Metrics'):
+    with st.spinner('Forecasting future metrics...'):
+        columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
+        forecasts = forecast_prophet(data, columns_to_forecast)
 
         #st.header("Forecasted Metrics")
         #for column, forecast in forecasts.items():
