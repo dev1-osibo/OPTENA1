@@ -208,16 +208,16 @@ if st.sidebar.button('Forecast Future Metrics'):
             st.write(f"Forecast for {column}:", forecast.head())
             
             # Adjust chart size and sampling
-            plt.figure(figsize=(4, 2))  # Smaller chart size
+            plt.figure(figsize=(2, 2))  # Smaller chart size
             forecast_sampled = forecast.iloc[::10]  # Downsample for better readability
             
             # Plot sampled forecast data
             plt.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
             
             # Add titles and labels with adjusted font sizes
-            plt.title(f"{column} Forecast", fontsize=10)
-            plt.xlabel("Time", fontsize=8)
-            plt.ylabel(column, fontsize=8)
+            plt.title(f"{column} Forecast", fontsize=8)
+            plt.xlabel("Time", fontsize=4)
+            plt.ylabel(column, fontsize=4)
             
             # Adjust legend size and placement
             plt.legend(loc='upper right', fontsize=8)
