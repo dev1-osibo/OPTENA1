@@ -201,26 +201,31 @@ if st.sidebar.button('Forecast Future Metrics'):
         
         # Generate forecasts using the forecast_prophet function
         forecasts = forecast_prophet(data, columns_to_forecast)
+st.header("Forecasted Metrics")
+for column, forecast in forecasts.items():
+    st.write(f"Forecast for {column}:", forecast.head())
 
-        # Display forecasted metrics
-        st.header("Forecasted Metrics")
-        for column, forecast in forecasts.items():
-            st.write(f"Forecast for {column}:", forecast.head())
-            
-            # Adjust chart size and sampling
-            plt.figure(figsize=(2, 2))  # Smaller chart size
-            forecast_sampled = forecast.iloc[::10]  # Downsample for better readability
-            
-            # Plot sampled forecast data
-            plt.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
-            
-            # Add titles and labels with adjusted font sizes
-            plt.title(f"{column} Forecast", fontsize=8)
-            plt.xlabel("Time", fontsize=4)
-            plt.ylabel(column, fontsize=4)
-            
-            # Adjust legend size and placement
-            plt.legend(loc='upper right', fontsize=8)
-            
-            # Display chart
-            st.pyplot(plt)
+    # Adjust chart size and sampling
+    fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
+    forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
+
+    # Plot sampled forecast data
+    ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
+
+    # Add titles and labels with adjusted font sizes
+    ax.set_title(f"{column} Forecast", fontsize=10)
+    ax.set_xlabel("Time", fontsize=8)
+    ax.set_ylabel(column, fontsize=8)
+
+    # Rotate and format x-axis ticks
+    ax.tick_params(axis='x', rotation=45, labelsize=7)
+    ax.tick_params(axis='y', labelsize=7)
+
+    # Adjust legend size and placement
+    ax.legend(loc='upper left', fontsize=7)
+
+    # Use tight layout to reduce white space around the figure
+    plt.tight_layout()
+
+    # Display chart with reduced white space
+    st.pyplot(fig, use_container_width=True)  # Ensure it fits within the Streamlit container
