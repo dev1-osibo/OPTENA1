@@ -194,18 +194,41 @@ if st.sidebar.button('Run Simulation'):
                 delta=f"{emissions_savings:.2f} kg CO? ({emissions_percentage:.2f}%)")
 
 # Forecast future metrics
-if st.sidebar.button('Forecast Future Metrics'):
-    with st.spinner('Forecasting future metrics...'):
-        columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
-        forecasts = forecast_prophet(data, columns_to_forecast)
+#if st.sidebar.button('Forecast Future Metrics'):
+    #with st.spinner('Forecasting future metrics...'):
+        #columns_to_forecast = ['Renewable Availability (%)', #'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
+        #forecasts = forecast_prophet(data, columns_to_forecast)
 
-        st.header("Forecasted Metrics")
-        for column, forecast in forecasts.items():
-            st.write(f"Forecast for {column}:", forecast.head())
-            plt.figure(figsize=(6, 3))
-            plt.plot(forecast['ds'], forecast['yhat'], label=f"{column} Forecast")
-            plt.title(f"{column} Forecast")
-            plt.xlabel("Time")
-            plt.ylabel(column)
-            plt.legend()
-            st.pyplot(plt)
+        #st.header("Forecasted Metrics")
+        #for column, forecast in forecasts.items():
+            #st.write(f"Forecast for {column}:", forecast.head())
+            #plt.figure(figsize=(6, 3))
+            #plt.plot(forecast['ds'], forecast['yhat'], #label=f"{column} Forecast")
+            #plt.title(f"{column} Forecast")
+            #plt.xlabel("Time")
+            #plt.ylabel(column)
+            #plt.legend()
+            #st.pyplot(plt)
+
+
+st.header("Forecasted Metrics")
+for column, forecast in forecasts.items():
+    st.write(f"Forecast for {column}:", forecast.head())
+    
+    # Adjust chart size and sampling
+    plt.figure(figsize=(4, 2))  # Smaller chart size
+    forecast_sampled = forecast.iloc[::10]  # Downsample for better readability
+    
+    # Plot sampled forecast data
+    plt.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
+    
+    # Add titles and labels with adjusted font sizes
+    plt.title(f"{column} Forecast", fontsize=10)
+    plt.xlabel("Time", fontsize=8)
+    plt.ylabel(column, fontsize=8)
+    
+    # Adjust legend size and placement
+    plt.legend(loc='upper right', fontsize=8)
+    
+    # Display chart
+    st.pyplot(plt)
