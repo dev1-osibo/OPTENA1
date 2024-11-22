@@ -1,0 +1,2 @@
+[server]
+maxUploadSize = 6000  # Set the size (in MB) to your desired value
