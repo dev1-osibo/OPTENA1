@@ -202,7 +202,7 @@ if st.sidebar.button('Forecast Future Metrics'):
         st.header("Forecasted Metrics")
         for column, forecast in forecasts.items():
             st.write(f"Forecast for {column}:", forecast.head())
-            plt.figure(figsize=(10, 6))
+            plt.figure(figsize=(6, 3))
             plt.plot(forecast['ds'], forecast['yhat'], label=f"{column} Forecast")
             plt.title(f"{column} Forecast")
             plt.xlabel("Time")
