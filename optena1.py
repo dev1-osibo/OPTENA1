@@ -201,9 +201,11 @@ if st.sidebar.button('Forecast Future Metrics'):
         
         # Generate forecasts using the forecast_prophet function
         forecasts = forecast_prophet(data, columns_to_forecast)
-st.header("Forecasted Metrics")
-for column, forecast in forecasts.items():
-    st.write(f"Forecast for {column}:", forecast.head())
+
+# Display forecasted Metrics
+    st.header("Forecasted Metrics")
+    for column, forecast in forecasts.items():
+        st.write(f"Forecast for {column}:", forecast.head())
 
     # Adjust chart size and sampling
     fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
