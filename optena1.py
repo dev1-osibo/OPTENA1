@@ -214,12 +214,12 @@ for column, forecast in forecasts.items():
 
     # Add titles and labels with adjusted font sizes
     ax.set_title(f"{column} Forecast", fontsize=10)
-    ax.set_xlabel("Time", fontsize=8)
-    ax.set_ylabel(column, fontsize=8)
+    ax.set_xlabel("Time", fontsize=6)
+    ax.set_ylabel(column, fontsize=6)
 
     # Rotate and format x-axis ticks
-    ax.tick_params(axis='x', rotation=45, labelsize=7)
-    ax.tick_params(axis='y', labelsize=7)
+    ax.tick_params(axis='x', rotation=45, labelsize=6)
+    ax.tick_params(axis='y', labelsize=6)
 
     # Adjust legend size and placement
     ax.legend(loc='upper left', fontsize=7)
