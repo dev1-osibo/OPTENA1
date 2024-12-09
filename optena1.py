@@ -102,16 +102,25 @@ uploaded_file = st.sidebar.file_uploader("Upload your data file", type=["csv", "
 # Tabs for features
 tabs = st.tabs(["Energy Optimization", "Predictive Maintenance", "Workload Distribution"])
 
-with tabs[0]:  # Energy Optimization
+# Sidebar Parameters Header
+st.sidebar.header("Feature Parameters")
+
+# Placeholder for data
+data = None
+
+if uploaded_file:
+    file_type = "csv" if uploaded_file.name.endswith('.csv') else "h5"
+    data = load_data(uploaded_file, file_type)
+    data = standardize_columns(data)
+
+# Tab 1: Energy Optimization
+with tabs[0]:
     st.subheader("Energy Optimization")
-    if uploaded_file:
-        file_type = "csv" if uploaded_file.name.endswith('.csv') else "h5"
-        data = load_data(uploaded_file, file_type)
-        data = standardize_columns(data)
+    
+    if data is not None:
         st.write("Loaded Data Preview:", data.head())
 
         # Sidebar controls for Energy Optimization
-        st.sidebar.header("Energy Optimization Parameters")
         energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=0.05, max_value=1.00, value=0.1, step=0.01)
         emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewables (kg CO2 per kWh)", 
                                                           min_value=0.1, max_value=1.0, value=0.5, step=0.05)
@@ -120,6 +129,7 @@ with tabs[0]:  # Energy Optimization
         renewable_threshold = st.sidebar.slider("Renewable Energy Availability Threshold (%)", 
                                                 min_value=0, max_value=100, value=70, step=5) / 100
 
+        # Baseline Metrics
         baseline_results = calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable)
         st.header("Baseline Metrics")
         col1, col2, col3 = st.columns(3)
@@ -127,6 +137,7 @@ with tabs[0]:  # Energy Optimization
         col2.metric("Total Cost ($)", f"{baseline_results['total_cost']:.2f}")
         col3.metric("Total CO2 Emissions (kg)", f"{baseline_results['total_emissions']:.2f}")
 
+        # Simulation Button and Results
         if st.sidebar.button('Run Simulation'):
             simulation_results = run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable)
             st.header("Optimized Metrics")
@@ -134,14 +145,15 @@ with tabs[0]:  # Energy Optimization
             col2.metric("Optimized Cost ($)", f"{simulation_results['optimized_cost']:.2f}")
             col3.metric("Optimized CO2 Emissions (kg)", f"{simulation_results['optimized_emissions']:.2f}")
 
-with tabs[1]:  # Predictive Maintenance
+    else:
+        st.warning("Please upload a valid data file to proceed.")
+
+# Tab 2: Predictive Maintenance
+with tabs[1]:
     st.subheader("Predictive Maintenance")
-    st.sidebar.header("Predictive Maintenance Parameters")
-    st.sidebar.write("No parameters to set for now.")
     st.write("This feature is under development. Please check back later!")
 
-with tabs[2]:  # Workload Distribution
+# Tab 3: Workload Distribution
+with tabs[2]:
     st.subheader("Workload Distribution")
-    st.sidebar.header("Workload Distribution Parameters")
-    st.sidebar.write("No parameters to set for now.")
     st.write("This feature is under development. Please check back later!")
