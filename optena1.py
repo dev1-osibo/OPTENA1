@@ -176,18 +176,25 @@ if st.sidebar.button('Run Simulation'):
         f"{simulation_results['optimized_emissions']:.2f}",
         delta=f"{emissions_savings:.2f} kg CO2 ({emissions_percentage:.2f}%)"
     )
-
+            
 # Forecast Button
 if st.sidebar.button('Forecast Metrics'):
     with st.spinner("Forecasting future metrics..."):
         # Specify columns to forecast
         columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
         
-        # Ensure data and columns exist
-        if data is not None and all(col in data.columns for col in columns_to_forecast):
-            # Generate forecasts using the forecast_prophet function
-            forecasts = forecast_prophet(data, columns_to_forecast)
-            
+        # Validate dataset
+        if not data or data.empty:
+            st.error("Data is missing or empty. Please upload a valid dataset.")
+        else:
+            missing_columns = [col for col in columns_to_forecast if col not in data.columns]
+            if missing_columns:
+                st.error(f"Missing required columns: {', '.join(missing_columns)}")
+            else:
+                try:
+                    # Generate forecasts
+                    forecasts = forecast_prophet(data, columns_to_forecast)
+
             # Display forecasted Metrics
             st.header("Forecasted Metrics")
             for column, forecast in forecasts.items():
