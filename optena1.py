@@ -195,57 +195,34 @@ if st.sidebar.button('Forecast Metrics'):
                     # Generate forecasts
                     forecasts = forecast_prophet(data, columns_to_forecast)
 
-            # Display forecasted Metrics
-            st.header("Forecasted Metrics")
-            for column, forecast in forecasts.items():
-                st.write(f"Forecast for {column}:", forecast.head())
+                    # Display forecasted metrics
+                    st.header("Forecasted Metrics")
+                    for column, forecast in forecasts.items():
+                        st.write(f"Forecast for {column}:", forecast.head())
 
-                # Adjust chart size and sampling
-                fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
-                forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
+                        # Adjust chart size and sampling
+                        fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
+                        forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
 
-                # Plot sampled forecast data
-                ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
+                        # Plot sampled forecast data
+                        ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
 
-                # Add titles and labels with adjusted font sizes
-                ax.set_title(f"{column} Forecast", fontsize=10)
-                ax.set_xlabel("Time", fontsize=6)
-                ax.set_ylabel(column, fontsize=6)
+                        # Add titles and labels with adjusted font sizes
+                        ax.set_title(f"{column} Forecast", fontsize=10)
+                        ax.set_xlabel("Time", fontsize=6)
+                        ax.set_ylabel(column, fontsize=6)
 
-                # Rotate and format x-axis ticks
-                ax.tick_params(axis='x', rotation=45, labelsize=6)
-                ax.tick_params(axis='y', labelsize=6)
+                        # Rotate and format x-axis ticks
+                        ax.tick_params(axis='x', rotation=45, labelsize=6)
+                        ax.tick_params(axis='y', labelsize=6)
 
-                # Adjust legend size and placement
-                ax.legend(loc='upper left', fontsize=7)
+                        # Adjust legend size and placement
+                        ax.legend(loc='upper left', fontsize=7)
 
-                # Use tight layout to reduce white space around the figure
-                plt.tight_layout()
+                        # Use tight layout to reduce white space around the figure
+                        plt.tight_layout()
 
-                # Display chart with reduced white space
-                st.pyplot(fig, use_container_width=True)
-        else:
-            st.error("Required columns for forecasting are missing in the data.")
-
-# Forecast Helper Function
-def forecast_prophet(data, columns, periods=365*24):
-    """
-    Forecast future values for multiple columns using Prophet.
-    """
-    forecasts = {}
-    for column in columns:
-        # Prepare data for Prophet
-        prophet_data = data.reset_index()[['Timestamp', column]].rename(columns={'Timestamp': 'ds', column: 'y'})
-        
-        # Initialize and fit the Prophet model
-        model = Prophet()
-        model.fit(prophet_data)
-        
-        # Create future periods DataFrame
-        future = model.make_future_dataframe(periods=periods, freq='H')
-        
-        # Generate forecast
-        forecast = model.predict(future)
-        forecasts[column] = forecast[['ds', 'yhat']]
-    
-    return forecasts
+                        # Display chart with reduced white space
+                        st.pyplot(fig, use_container_width=True)
+                except Exception as e:
+                    st.error(f"Error during forecasting: {e}")
