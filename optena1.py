@@ -9,7 +9,7 @@ st.set_page_config(page_title="OPTENA: Energy Optimization Systems", page_icon="
 
 # App Header
 st.markdown(
-    "<h1 style='text-align: center; color: #4CAF50; font-size: 15em;'>OPTENA</h1>",
+    "<h1 style='text-align: center; color: #4CAF50; font-size: 10em;'>OPTENA</h1>",
     unsafe_allow_html=True
 )
 st.markdown(
@@ -110,7 +110,8 @@ with tabs[0]:  # Energy Optimization
         data = standardize_columns(data)
         st.write("Loaded Data Preview:", data.head())
 
-        # Sidebar sliders
+        # Sidebar controls for Energy Optimization
+        st.sidebar.header("Energy Optimization Parameters")
         energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=0.05, max_value=1.00, value=0.1, step=0.01)
         emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewables (kg CO2 per kWh)", 
                                                           min_value=0.1, max_value=1.0, value=0.5, step=0.05)
@@ -135,8 +136,12 @@ with tabs[0]:  # Energy Optimization
 
 with tabs[1]:  # Predictive Maintenance
     st.subheader("Predictive Maintenance")
+    st.sidebar.header("Predictive Maintenance Parameters")
+    st.sidebar.write("No parameters to set for now.")
     st.write("This feature is under development. Please check back later!")
 
 with tabs[2]:  # Workload Distribution
     st.subheader("Workload Distribution")
+    st.sidebar.header("Workload Distribution Parameters")
+    st.sidebar.write("No parameters to set for now.")
     st.write("This feature is under development. Please check back later!")
