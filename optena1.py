@@ -96,138 +96,47 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
     }
     return results
 
-# Forecasting function using Prophet
-def forecast_prophet(data, columns, periods=365*24):
-    """
-    Forecast future values for multiple columns using Prophet.
-    """
-    forecasts = {}
-    for column in columns:
-        # Prepare data for Prophet
-        prophet_data = data.reset_index()[['Timestamp', column]].rename(columns={'Timestamp': 'ds', column: 'y'})
-        
-        # Initialize and fit the Prophet model
-        model = Prophet()
-        model.fit(prophet_data)
-        
-        # Create future periods DataFrame
-        future = model.make_future_dataframe(periods=periods, freq='H')
-        
-        # Generate forecast
-        forecast = model.predict(future)
-        forecasts[column] = forecast[['ds', 'yhat']]
-    
-    return forecasts
-
-# Sidebar Inputs: File Uploader
+# Main Interface
 uploaded_file = st.sidebar.file_uploader("Upload your data file", type=["csv", "h5"])
-if uploaded_file:
-    file_type = "csv" if uploaded_file.name.endswith('.csv') else "h5"
-    data = load_data(uploaded_file, file_type)
-else:
-    st.sidebar.write("Using default synthetic dataset.")
-    data = load_data('synthetic_data_center_data.csv', file_type="csv")
 
-data = standardize_columns(data)
+# Tabs for features
+tabs = st.tabs(["Energy Optimization", "Predictive Maintenance", "Workload Distribution"])
 
-# Display loaded data preview
-st.write("Loaded Data Preview:", data.head())
+with tabs[0]:  # Energy Optimization
+    st.subheader("Energy Optimization")
+    if uploaded_file:
+        file_type = "csv" if uploaded_file.name.endswith('.csv') else "h5"
+        data = load_data(uploaded_file, file_type)
+        data = standardize_columns(data)
+        st.write("Loaded Data Preview:", data.head())
 
-# Sidebar sliders dynamically adjusted
-energy_price_min = round(data['Energy Price ($/kWh)'].min(), 2)
-energy_price_max = round(data['Energy Price ($/kWh)'].max(), 2)
-renewable_min = round(data['Renewable Availability (%)'].min(), 1)
-renewable_max = round(data['Renewable Availability (%)'].max(), 1)
+        # Sidebar sliders
+        energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=0.05, max_value=1.00, value=0.1, step=0.01)
+        emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewables (kg CO2 per kWh)", 
+                                                          min_value=0.1, max_value=1.0, value=0.5, step=0.05)
+        emission_factor_renewable = st.sidebar.slider("Emission Factor for Renewables (kg CO2 per kWh)", 
+                                                      min_value=0.0, max_value=0.5, value=0.02, step=0.01)
+        renewable_threshold = st.sidebar.slider("Renewable Energy Availability Threshold (%)", 
+                                                min_value=0, max_value=100, value=70, step=5) / 100
 
-energy_price_per_kwh = st.sidebar.slider("Energy Price per kWh ($)", min_value=energy_price_min,
-                                         max_value=energy_price_max,
-                                         value=round((energy_price_min + energy_price_max) / 2, 2), step=0.01)
+        baseline_results = calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable)
+        st.header("Baseline Metrics")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Total Energy Consumption (kWh)", f"{baseline_results['total_energy']:.2f}")
+        col2.metric("Total Cost ($)", f"{baseline_results['total_cost']:.2f}")
+        col3.metric("Total CO2 Emissions (kg)", f"{baseline_results['total_emissions']:.2f}")
 
-emission_factor_non_renewable = st.sidebar.slider("Emission Factor for Non-Renewables (kg CO? per kWh)", 
-                                                  min_value=0.1, max_value=1.0, value=0.5, step=0.05)
+        if st.sidebar.button('Run Simulation'):
+            simulation_results = run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable)
+            st.header("Optimized Metrics")
+            col1.metric("Optimized Energy Consumption (kWh)", f"{simulation_results['optimized_energy']:.2f}")
+            col2.metric("Optimized Cost ($)", f"{simulation_results['optimized_cost']:.2f}")
+            col3.metric("Optimized CO2 Emissions (kg)", f"{simulation_results['optimized_emissions']:.2f}")
 
-emission_factor_renewable = st.sidebar.slider("Emission Factor for Renewables (kg CO? per kWh)", 
-                                              min_value=0.0, max_value=0.5, value=0.02, step=0.01)
+with tabs[1]:  # Predictive Maintenance
+    st.subheader("Predictive Maintenance")
+    st.write("This feature is under development. Please check back later!")
 
-renewable_threshold = st.sidebar.slider("Renewable Energy Availability Threshold (%)", 
-                                        min_value=renewable_min,
-                                        max_value=renewable_max,
-                                        value=(renewable_min + renewable_max) / 2,
-                                        step=1.0) / 100
-
-# Calculate baseline metrics
-baseline_results = calculate_baseline(data, energy_price_per_kwh, emission_factor_non_renewable)
-
-st.header("Baseline Metrics")
-col1, col2, col3 = st.columns(3)
-col1.metric("Total Energy Consumption (kWh)", f"{baseline_results['total_energy']:.2f}")
-col2.metric("Total Cost ($)", f"{baseline_results['total_cost']:.2f}")
-col3.metric("Total CO? Emissions (kg)", f"{baseline_results['total_emissions']:.2f}")
-
-# Run simulation and display optimized metrics
-if st.sidebar.button('Run Simulation'):
-    with st.spinner('Running simulation...'):
-        simulation_results = run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_factor_non_renewable, emission_factor_renewable)
-
-    st.subheader("Optimized Metrics")
-    col1, col2, col3 = st.columns(3)
-
-    # Energy Savings
-    energy_savings = simulation_results['energy_savings']
-    energy_percentage = (energy_savings / baseline_results['total_energy'] * 100) if baseline_results['total_energy'] > 0 else 0
-    col1.metric("Optimized Energy Consumption (kWh)", 
-                f"{simulation_results['optimized_energy']:.2f}",
-                delta=f"{energy_savings:.2f} kWh ({energy_percentage:.2f}%)")
-
-    # Cost Savings
-    cost_savings = simulation_results['cost_savings']
-    cost_percentage = (cost_savings / baseline_results['total_cost'] * 100) if baseline_results['total_cost'] > 0 else 0
-    col2.metric("Optimized Cost ($)", 
-                f"{simulation_results['optimized_cost']:.2f}",
-                delta=f"${cost_savings:.2f} ({cost_percentage:.2f}%)")
-
-    # Emissions Savings
-    emissions_savings = simulation_results['emissions_savings']
-    emissions_percentage = (emissions_savings / baseline_results['total_emissions'] * 100) if baseline_results['total_emissions'] > 0 else 0
-    col3.metric("Optimized CO? Emissions (kg)", 
-                f"{simulation_results['optimized_emissions']:.2f}",
-                delta=f"{emissions_savings:.2f} kg CO? ({emissions_percentage:.2f}%)")
-
-# Forecast future metrics
-if st.sidebar.button('Forecast Future Metrics'):
-    with st.spinner('Forecasting future metrics...'):
-        # Specify columns to forecast
-        columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
-        
-        # Generate forecasts using the forecast_prophet function
-        forecasts = forecast_prophet(data, columns_to_forecast)
-
-# Display forecasted Metrics
-    st.header("Forecasted Metrics")
-    for column, forecast in forecasts.items():
-        st.write(f"Forecast for {column}:", forecast.head())
-
-    # Adjust chart size and sampling
-        fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
-        forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
-
-    # Plot sampled forecast data
-        ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
-
-    # Add titles and labels with adjusted font sizes
-        ax.set_title(f"{column} Forecast", fontsize=10)
-        ax.set_xlabel("Time", fontsize=6)
-        ax.set_ylabel(column, fontsize=6)
-
-    # Rotate and format x-axis ticks
-        ax.tick_params(axis='x', rotation=45, labelsize=6)
-        ax.tick_params(axis='y', labelsize=6)
-
-    # Adjust legend size and placement
-        ax.legend(loc='upper left', fontsize=7)
-
-    # Use tight layout to reduce white space around the figure
-        plt.tight_layout()
-
-    # Display chart with reduced white space
-        st.pyplot(fig, use_container_width=True)  # Ensure it fits within the Streamlit container
+with tabs[2]:  # Workload Distribution
+    st.subheader("Workload Distribution")
+    st.write("This feature is under development. Please check back later!")
