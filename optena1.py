@@ -150,6 +150,7 @@ with tabs[0]:
                         f"{simulation_results['optimized_energy']:.2f}",
                         delta=f"{energy_savings:.2f} kWh ({energy_percentage:.2f}%)")
 
+
             # Cost Savings
             cost_savings = simulation_results['cost_savings']
             cost_percentage = (cost_savings / baseline_results['total_cost'] * 100) if baseline_results['total_cost'] > 0 else 0
@@ -163,6 +164,73 @@ with tabs[0]:
             col3.metric("Optimized CO2 Emissions (kg)", 
                         f"{simulation_results['optimized_emissions']:.2f}",
                         delta=f"{emissions_savings:.2f} kg CO2 ({emissions_percentage:.2f}%)")
+
+# Forecast future metrics
+if st.sidebar.button('Forecast Metrics'):
+    with st.spinner("Forecasting future metrics..."):
+        # Specify columns to forecast
+        columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
+        
+        # Ensure data and columns exist
+        if data is not None and all(col in data.columns for col in columns_to_forecast):
+            # Generate forecasts using the forecast_prophet function
+            forecasts = forecast_prophet(data, columns_to_forecast)
+            
+            # Display forecasted Metrics
+            st.header("Forecasted Metrics")
+            for column, forecast in forecasts.items():
+                st.write(f"Forecast for {column}:", forecast.head())
+
+                # Adjust chart size and sampling
+                fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
+                forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
+
+                # Plot sampled forecast data
+                ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
+
+                # Add titles and labels with adjusted font sizes
+                ax.set_title(f"{column} Forecast", fontsize=10)
+                ax.set_xlabel("Time", fontsize=6)
+                ax.set_ylabel(column, fontsize=6)
+
+                # Rotate and format x-axis ticks
+                ax.tick_params(axis='x', rotation=45, labelsize=6)
+                ax.tick_params(axis='y', labelsize=6)
+
+                # Adjust legend size and placement
+                ax.legend(loc='upper left', fontsize=7)
+
+                # Use tight layout to reduce white space around the figure
+                plt.tight_layout()
+
+                # Display chart with reduced white space
+                st.pyplot(fig, use_container_width=True)
+        else:
+            st.error("Required columns for forecasting are missing in the data.")
+
+
+def forecast_prophet(data, columns, periods=365*24):
+    """
+    Forecast future values for multiple columns using Prophet.
+    """
+    forecasts = {}
+    for column in columns:
+        # Prepare data for Prophet
+        prophet_data = data.reset_index()[['Timestamp', column]].rename(columns={'Timestamp': 'ds', column: 'y'})
+        
+        # Initialize and fit the Prophet model
+        model = Prophet()
+        model.fit(prophet_data)
+        
+        # Create future periods DataFrame
+        future = model.make_future_dataframe(periods=periods, freq='H')
+        
+        # Generate forecast
+        forecast = model.predict(future)
+        forecasts[column] = forecast[['ds', 'yhat']]
+    
+    return forecasts
+
 
         # Forecast Button
         if st.sidebar.button('Forecast Metrics'):
