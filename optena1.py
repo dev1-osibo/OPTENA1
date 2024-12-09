@@ -208,26 +208,26 @@ if st.sidebar.button('Forecast Future Metrics'):
         st.write(f"Forecast for {column}:", forecast.head())
 
     # Adjust chart size and sampling
-    fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
-    forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
+        fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
+        forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
 
     # Plot sampled forecast data
-    ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
+        ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
 
     # Add titles and labels with adjusted font sizes
-    ax.set_title(f"{column} Forecast", fontsize=10)
-    ax.set_xlabel("Time", fontsize=6)
-    ax.set_ylabel(column, fontsize=6)
+        ax.set_title(f"{column} Forecast", fontsize=10)
+        ax.set_xlabel("Time", fontsize=6)
+        ax.set_ylabel(column, fontsize=6)
 
     # Rotate and format x-axis ticks
-    ax.tick_params(axis='x', rotation=45, labelsize=6)
-    ax.tick_params(axis='y', labelsize=6)
+        ax.tick_params(axis='x', rotation=45, labelsize=6)
+        ax.tick_params(axis='y', labelsize=6)
 
     # Adjust legend size and placement
-    ax.legend(loc='upper left', fontsize=7)
+        ax.legend(loc='upper left', fontsize=7)
 
     # Use tight layout to reduce white space around the figure
-    plt.tight_layout()
+        plt.tight_layout()
 
     # Display chart with reduced white space
-    st.pyplot(fig, use_container_width=True)  # Ensure it fits within the Streamlit container
+        st.pyplot(fig, use_container_width=True)  # Ensure it fits within the Streamlit container
