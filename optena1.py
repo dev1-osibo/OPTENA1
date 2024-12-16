@@ -93,6 +93,9 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
     }
     return results
 
+# Initialize data to None at the start
+data = None
+
 # Unified UI Workflow
 st.title("Energy Optimization and Workload Distribution")
 
