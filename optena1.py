@@ -177,6 +177,38 @@ if st.sidebar.button('Run Simulation'):
         delta=f"{emissions_savings:.2f} kg CO2 ({emissions_percentage:.2f}%)"
     )
 
+from prophet import Prophet
+
+def forecast_prophet(data, columns, periods=365*24):
+    """
+    Forecast future values for multiple columns using Prophet.
+    
+    Parameters:
+        data (pd.DataFrame): DataFrame with a 'Timestamp' index and the columns to forecast.
+        columns (list): List of column names to forecast.
+        periods (int): Number of future periods (hours) to forecast.
+
+    Returns:
+        dict: A dictionary containing forecast DataFrames for each column.
+    """
+    forecasts = {}
+    for column in columns:
+        # Prepare data for Prophet
+        prophet_data = data.reset_index()[['Timestamp', column]].rename(columns={'Timestamp': 'ds', column: 'y'})
+        
+        # Initialize and fit the Prophet model
+        model = Prophet()
+        model.fit(prophet_data)
+        
+        # Create future periods DataFrame
+        future = model.make_future_dataframe(periods=periods, freq='H')
+        
+        # Generate forecast
+        forecast = model.predict(future)
+        forecasts[column] = forecast[['ds', 'yhat']]
+    
+    return forecasts
+
 # Forecast Button
 if st.sidebar.button('Forecast Metrics'):
     with st.spinner("Forecasting future metrics..."):
