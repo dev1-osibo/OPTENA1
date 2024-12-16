@@ -226,3 +226,4 @@ if st.sidebar.button('Forecast Metrics'):
                         st.pyplot(fig, use_container_width=True)
                 except Exception as e:
                     st.error(f"Error during forecasting: {e}")
+
