@@ -83,13 +83,13 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
     )
 
     results = {
-        'optimized_energy': data['Optimized Energy'].sum(),
-        'optimized_cost': (data['Optimized Energy'] * energy_price_per_kwh).sum(),
-        'optimized_emissions': data['Optimized Emissions'].sum(),
-        'energy_savings': data['Workload Energy Consumption (kWh)'].sum() - data['Optimized Energy'].sum(),
-        'cost_savings': (data['Workload Energy Consumption (kWh)'] * energy_price_per_kwh).sum() - \
-                        (data['Optimized Energy'] * energy_price_per_kwh).sum(),
-        'emissions_savings': data['Baseline Emissions'].sum() - data['Optimized Emissions'].sum(),
+        'optimized_energy': round(data['Optimized Energy'].sum(), 2),
+        'optimized_cost': round((data['Optimized Energy'] * energy_price_per_kwh).sum(), 2),
+        'optimized_emissions': round(data['Optimized Emissions'].sum(), 2),
+        'energy_savings': round(data['Workload Energy Consumption (kWh)'].sum() - data['Optimized Energy'].sum(), 2),
+        'cost_savings': round((data['Workload Energy Consumption (kWh)'] * energy_price_per_kwh).sum() - \
+                        (data['Optimized Energy'] * energy_price_per_kwh).sum(), 2),
+        'emissions_savings': round(data['Baseline Emissions'].sum() - data['Optimized Emissions'].sum(), 2),
     }
     return results
 
@@ -129,6 +129,18 @@ if use_forecasted_data == "Yes" and st.button("Generate Forecasts"):
         })
         forecasted_data.set_index('Timestamp', inplace=True)
         st.write("Forecast Results:", forecasted_data.head())
+
+        # Display charts for forecasts
+        for column, forecast in forecasts.items():
+            st.write(f"Forecast for {column}:")
+            fig, ax = plt.subplots(figsize=(6, 3))
+            ax.plot(forecast['ds'], forecast['yhat'], label=f"{column} Forecast")
+            ax.set_title(f"{column} Forecast")
+            ax.set_xlabel("Time")
+            ax.set_ylabel(column)
+            ax.legend()
+            st.pyplot(fig)
+
         st.success("You are now using forecasted metrics for the simulation.")
         data_for_processing = forecasted_data
 else:
@@ -147,17 +159,48 @@ if st.button("Run Optimization"):
                 emission_factor_non_renewable,
                 emission_factor_renewable
             )
-        st.write("Optimization Results:", results)
+        st.write("Optimization Results:")
+        st.metric("Optimized Energy (kWh)", f"{results['optimized_energy']}", delta=f"{results['energy_savings']} kWh")
+        st.metric("Optimized Cost ($)", f"{results['optimized_cost']}", delta=f"${results['cost_savings']}")
+        st.metric("Optimized CO2 Emissions (kg)", f"{results['optimized_emissions']}", delta=f"{results['emissions_savings']} kg")
+
         if use_forecasted_data == "Yes":
             st.success("These results are based on forecasted metrics.")
         else:
             st.success("These results are based on historical data.")
+
+        # Optimization performance charts
+        if 'Optimized Energy' in data_for_processing.columns:
+            st.write("Optimization Performance Over Time:")
+            fig, ax = plt.subplots(figsize=(10, 5))
+            ax.plot(data_for_processing.index, data_for_processing['Workload Energy Consumption (kWh)'], label="Original Consumption")
+            ax.plot(data_for_processing.index, data_for_processing['Optimized Energy'], label="Optimized Consumption")
+            ax.set_title("Energy Consumption: Original vs Optimized")
+            ax.set_xlabel("Time")
+            ax.set_ylabel("Energy (kWh)")
+            ax.legend()
+            st.pyplot(fig)
     else:
         st.error("No data available for processing. Please upload data.")
 
 # Step 5: Recommendations
 if data_for_processing is not None:
     st.subheader("OPTENA Recommendations")
+
+    # Time-specific recommendations
+    data_for_processing['Hour'] = data_for_processing.index.hour
+    data_for_processing['Day'] = data_for_processing.index.day_name()
+
+    hourly_availability = data_for_processing.groupby('Hour')['Renewable Availability (%)'].mean()
+    daily_prices = data_for_processing.groupby('Day')['Energy Price ($/kWh)'].mean()
+
+    optimal_hour = hourly_availability.idxmax()
+    optimal_day = daily_prices.idxmin()
+
+    st.write(f"- Best hour to schedule workloads: {optimal_hour}:00 with highest average renewable availability.")
+    st.write(f"- Best day to minimize costs: {optimal_day} with lowest average energy price.")
+
+    # Other recommendations
     st.write(f"- Shift workloads to maximize renewable availability above {renewable_threshold * 100:.1f}%.")
     st.write("- Reduce workload during high energy price periods.")
     st.write("- Optimize server usage to decrease overall energy draw.")
