@@ -133,7 +133,7 @@ if use_forecasted_data == "Yes" and st.button("Generate Forecasts"):
         # Display charts for forecasts
         for column, forecast in forecasts.items():
             st.write(f"Forecast for {column}:")
-            fig, ax = plt.subplots(figsize=(6, 3))
+            fig, ax = plt.subplots(figsize=(4, 2))
             ax.plot(forecast['ds'], forecast['yhat'], label=f"{column} Forecast")
             ax.set_title(f"{column} Forecast")
             ax.set_xlabel("Time")
@@ -160,9 +160,10 @@ if st.button("Run Optimization"):
                 emission_factor_renewable
             )
         st.write("Optimization Results:")
-        st.metric("Optimized Energy (kWh)", f"{results['optimized_energy']}", delta=f"{results['energy_savings']} kWh")
-        st.metric("Optimized Cost ($)", f"{results['optimized_cost']}", delta=f"${results['cost_savings']}")
-        st.metric("Optimized CO2 Emissions (kg)", f"{results['optimized_emissions']}", delta=f"{results['emissions_savings']} kg")
+        col1, col2, col3 = st.columns(3)
+        col1.metric("Optimized Energy (kWh)", f"{results['optimized_energy']}", delta=f"{results['energy_savings']} kWh")
+        col2.metric("Optimized Cost ($)", f"{results['optimized_cost']}", delta=f"${results['cost_savings']}")
+        col3.metric("Optimized CO2 Emissions (kg)", f"{results['optimized_emissions']}", delta=f"{results['emissions_savings']} kg")
 
         if use_forecasted_data == "Yes":
             st.success("These results are based on forecasted metrics.")
@@ -172,9 +173,9 @@ if st.button("Run Optimization"):
         # Optimization performance charts
         if 'Optimized Energy' in data_for_processing.columns:
             st.write("Optimization Performance Over Time:")
-            fig, ax = plt.subplots(figsize=(10, 5))
-            ax.plot(data_for_processing.index, data_for_processing['Workload Energy Consumption (kWh)'], label="Original Consumption")
-            ax.plot(data_for_processing.index, data_for_processing['Optimized Energy'], label="Optimized Consumption")
+            fig, ax = plt.subplots(figsize=(8, 4))
+            ax.plot(data_for_processing.index, data_for_processing['Workload Energy Consumption (kWh)'], label="Original Consumption", alpha=0.7)
+            ax.plot(data_for_processing.index, data_for_processing['Optimized Energy'], label="Optimized Consumption", alpha=0.7)
             ax.set_title("Energy Consumption: Original vs Optimized")
             ax.set_xlabel("Time")
             ax.set_ylabel("Energy (kWh)")
