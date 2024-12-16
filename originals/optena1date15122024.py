@@ -9,7 +9,7 @@ st.set_page_config(page_title="OPTENA: Energy Optimization Systems", page_icon="
 
 # App Header
 st.markdown(
-    "<h1 style='text-align: center; color: #4CAF50; font-size: 5em;'>OPTENA</h1>",
+    "<h1 style='text-align: center; color: #4CAF50; font-size: 10em;'>OPTENA</h1>",
     unsafe_allow_html=True
 )
 st.markdown(
@@ -209,12 +209,6 @@ def forecast_prophet(data, columns, periods=365*24):
     
     return forecasts
 
-
-# Toggle for Forecasted or Historical Data
-use_forecasted_data = st.sidebar.radio(
-    "Use Forecasted Data for Load Balancing?", ["No", "Yes"], index=0
-)
-
 # Forecast Button
 if st.sidebar.button('Forecast Metrics'):
     with st.spinner("Forecasting future metrics..."):
@@ -265,40 +259,3 @@ if st.sidebar.button('Forecast Metrics'):
 
                 except Exception as e:
                     st.error(f"An error occurred during forecasting: {e}")
-
-# Process Data for Load Balancing
-if use_forecasted_data == "Yes" and 'forecasts' in locals():
-    st.success("Using forecasted data for load balancing.")
-    # Merge forecasted data into a single DataFrame
-    forecasted_data = pd.DataFrame({
-        'Timestamp': forecasts['Workload Energy Consumption (kWh)']['ds'],
-        'Workload Energy Consumption (kWh)': forecasts['Workload Energy Consumption (kWh)']['yhat'],
-        'Renewable Availability (%)': forecasts['Renewable Availability (%)']['yhat'],
-        'Energy Price ($/kWh)': forecasts['Energy Price ($/kWh)']['yhat']
-    })
-    forecasted_data.set_index('Timestamp', inplace=True)
-    data_for_balancing = forecasted_data
-else:
-    st.success("Using uploaded historical data for load balancing.")
-    data_for_balancing = data
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
