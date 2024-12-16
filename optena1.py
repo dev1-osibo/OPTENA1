@@ -96,7 +96,14 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
 # Initialize data to None at the start
 data = None
 
-# Unified UI Workflow
+# Step 1: Data Upload
+uploaded_file = st.file_uploader("Upload your data file (CSV or HDF5)", type=["csv", "h5"])
+data_for_processing = None
+
+# Step 3: Forecasting Option
+use_forecasted_data = st.radio("Use Forecasted Data?", ["No", "Yes"], index=0)
+
+# Adjust heading based on user actions
 if uploaded_file and use_forecasted_data == "Yes":
     st.markdown("<h3 style='text-align: center;'>Using Forecasted Metrics for Workload Optimization</h3>", unsafe_allow_html=True)
 elif uploaded_file:
@@ -104,9 +111,6 @@ elif uploaded_file:
 else:
     st.markdown("<h3 style='text-align: center;'>Energy Optimization and Workload Distribution</h3>", unsafe_allow_html=True)
 
-# Step 1: Data Upload
-uploaded_file = st.file_uploader("Upload your data file (CSV or HDF5)", type=["csv", "h5"])
-data_for_processing = None
 if uploaded_file:
     file_type = "csv" if uploaded_file.name.endswith('.csv') else "h5"
     data = load_data(uploaded_file, file_type)
@@ -121,7 +125,6 @@ emission_factor_non_renewable = st.slider("Emission Factor (Non-Renewables)", mi
 emission_factor_renewable = st.slider("Emission Factor (Renewables)", min_value=0.0, max_value=0.5, value=0.02, step=0.01)
 
 # Step 3: Forecasting
-use_forecasted_data = st.radio("Use Forecasted Data?", ["No", "Yes"], index=0)
 if use_forecasted_data == "Yes" and st.button("Generate Forecasts"):
     with st.spinner("Generating forecasts..."):
         columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
