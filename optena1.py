@@ -176,7 +176,7 @@ if st.sidebar.button('Run Simulation'):
         f"{simulation_results['optimized_emissions']:.2f}",
         delta=f"{emissions_savings:.2f} kg CO2 ({emissions_percentage:.2f}%)"
     )
-            
+
 # Forecast Button
 if st.sidebar.button('Forecast Metrics'):
     with st.spinner("Forecasting future metrics..."):
@@ -184,11 +184,12 @@ if st.sidebar.button('Forecast Metrics'):
         columns_to_forecast = ['Renewable Availability (%)', 'Workload Energy Consumption (kWh)', 'Energy Price ($/kWh)']
         
         # Validate dataset
-        if not data or data.empty:
+        if data is None or data.empty:
             st.error("Data is missing or empty. Please upload a valid dataset.")
         else:
-            missing_columns = [col for col in columns_to_forecast 
-if data is None or data.empty:
+            # Check for missing columns
+            missing_columns = [col for col in columns_to_forecast if col not in data.columns]
+            
             if missing_columns:
                 st.error(f"Missing required columns: {', '.join(missing_columns)}")
             else:
@@ -196,35 +197,33 @@ if data is None or data.empty:
                     # Generate forecasts
                     forecasts = forecast_prophet(data, columns_to_forecast)
 
-                    # Display forecasted metrics
+                    # Display Forecasted Metrics
                     st.header("Forecasted Metrics")
                     for column, forecast in forecasts.items():
                         st.write(f"Forecast for {column}:", forecast.head())
 
                         # Adjust chart size and sampling
-                        fig, ax = plt.subplots(figsize=(6, 3))  # Create a new figure with reduced size
+                        fig, ax = plt.subplots(figsize=(6, 3))  # Create a smaller chart
                         forecast_sampled = forecast.iloc[::24]  # Downsample to show one data point per day
 
                         # Plot sampled forecast data
                         ax.plot(forecast_sampled['ds'], forecast_sampled['yhat'], label=f"{column} Forecast")
 
-                        # Add titles and labels with adjusted font sizes
+                        # Add titles and labels
                         ax.set_title(f"{column} Forecast", fontsize=10)
-                        ax.set_xlabel("Time", fontsize=6)
-                        ax.set_ylabel(column, fontsize=6)
+                        ax.set_xlabel("Time", fontsize=8)
+                        ax.set_ylabel(column, fontsize=8)
 
                         # Rotate and format x-axis ticks
                         ax.tick_params(axis='x', rotation=45, labelsize=6)
                         ax.tick_params(axis='y', labelsize=6)
 
-                        # Adjust legend size and placement
+                        # Add legend
                         ax.legend(loc='upper left', fontsize=7)
 
-                        # Use tight layout to reduce white space around the figure
+                        # Display chart with tight layout
                         plt.tight_layout()
-
-                        # Display chart with reduced white space
                         st.pyplot(fig, use_container_width=True)
-                except Exception as e:
-                    st.error(f"Error during forecasting: {e}")
 
+                except Exception as e:
+                    st.error(f"An error occurred during forecasting: {e}")
