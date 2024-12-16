@@ -97,7 +97,12 @@ def run_simulation(data, renewable_threshold, energy_price_per_kwh, emission_fac
 data = None
 
 # Unified UI Workflow
-st.title("Energy Optimization and Workload Distribution")
+if uploaded_file and use_forecasted_data == "Yes":
+    st.markdown("<h3 style='text-align: center;'>Using Forecasted Metrics for Workload Optimization</h3>", unsafe_allow_html=True)
+elif uploaded_file:
+    st.markdown("<h3 style='text-align: center;'>Optimizing Energy and Workload Based on Historical Data</h3>", unsafe_allow_html=True)
+else:
+    st.markdown("<h3 style='text-align: center;'>Energy Optimization and Workload Distribution</h3>", unsafe_allow_html=True)
 
 # Step 1: Data Upload
 uploaded_file = st.file_uploader("Upload your data file (CSV or HDF5)", type=["csv", "h5"])
