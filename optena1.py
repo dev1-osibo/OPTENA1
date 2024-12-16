@@ -187,7 +187,8 @@ if st.sidebar.button('Forecast Metrics'):
         if not data or data.empty:
             st.error("Data is missing or empty. Please upload a valid dataset.")
         else:
-            missing_columns = [col for col in columns_to_forecast if col not in data.columns]
+            missing_columns = [col for col in columns_to_forecast 
+if data is None or data.empty:
             if missing_columns:
                 st.error(f"Missing required columns: {', '.join(missing_columns)}")
             else:
